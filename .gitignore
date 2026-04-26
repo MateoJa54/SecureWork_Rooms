@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+
+# Environment
+.env
+
+# Uploads
+uploads/
+
+# Coverage
+coverage/
+
+# Build
+dist/
+build/
+
+# OS
+.DS_Store
+*.log
