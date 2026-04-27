@@ -1,3 +1,4 @@
+require('dotenv').config({ path: 'C:\\Users\\MSI\\Desktop\\SecureWork_Rooms\\.env' });
 const { Pool } = require('pg');
 const fs = require('fs');
 const path = require('path');
