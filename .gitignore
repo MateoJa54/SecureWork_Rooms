@@ -16,4 +16,10 @@ build/
 
 # OS
 .DS_Store
+Thumbs.db
 *.log
+
+# Docker
+.dockerignore
+
+CLAUDE.md
