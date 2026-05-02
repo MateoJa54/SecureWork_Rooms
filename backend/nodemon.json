@@ -2,5 +2,5 @@
   "watch": ["src", "app.js", "server.js"],
   "ext": "js,json",
   "ignore": ["src/tests/**", "node_modules", "uploads"],
-  "exec": "node server.js"
+  "exec": "node --inspect=0.0.0.0:9229 server.js"
 }

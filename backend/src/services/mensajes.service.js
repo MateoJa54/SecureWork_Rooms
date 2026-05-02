@@ -34,4 +34,4 @@ async function obtenerEstadoInicial(sala_id) {
   return { sala: salaPublica, usuarios, mensajes_recientes };
 }
 
-module.exports = { procesarMensaje, obtenerEstadoInicial, obtenerHistorial };
+module.exports = { procesarMensaje, obtenerEstadoInicial };
