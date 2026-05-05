@@ -50,6 +50,20 @@ app.get('/api/health', async (req, res) => {
   res.status(statusCode).json(result);
 });
 
+// Endpoint de diagnóstico — TEMPORAL
+app.get('/api/diag/salas', async (req, res) => {
+  try {
+    const { pool } = require('./src/config/database');
+    const { rows } = await pool.query('SELECT id, nombre, pin_hash, pin_plano, activa FROM salas');
+    res.json({
+      total_salas: rows.length,
+      salas: rows.map(s => ({ id: s.id, nombre: s.nombre, pin: s.pin_plano, activa: s.activa }))
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Rutas de la API
 app.use('/api/auth', require('./src/routes/auth.routes'));
 app.use('/api/salas', require('./src/routes/salas.routes'));

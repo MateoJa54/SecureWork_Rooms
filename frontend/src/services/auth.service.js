@@ -4,7 +4,7 @@ import api from './api.js';
 export async function login(email, password) {
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) throw new Error(error.message);
-  await api.post('/auth/verify');
+  await api.get('/auth/verify');
   return data.session;
 }
 

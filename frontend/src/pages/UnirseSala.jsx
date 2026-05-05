@@ -8,7 +8,7 @@ import ErrorMessage from '../components/common/ErrorMessage.jsx';
 
 export default function UnirseSala() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ nombre_sala: '', pin: '', nickname: '' });
+  const [form, setForm] = useState({ pin: '', nickname: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -25,7 +25,6 @@ export default function UnirseSala() {
       const fingerprint = await getFingerprint();
 
       const data = await unirseSala({
-        nombre_sala: form.nombre_sala,
         pin: form.pin,
         nickname: form.nickname,
         device_id,
@@ -52,13 +51,6 @@ export default function UnirseSala() {
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <ErrorMessage message={error} />
 
-          <Input
-            label="Nombre de la sala"
-            value={form.nombre_sala}
-            onChange={(e) => set('nombre_sala', e.target.value)}
-            required
-            placeholder="Sala de trabajo..."
-          />
           <Input
             label="PIN"
             type="password"

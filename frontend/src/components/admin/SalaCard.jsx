@@ -22,6 +22,7 @@ export default function SalaCard({ sala, onEliminar }) {
         </div>
       </div>
       <div className="text-xs text-gray-500 space-y-1">
+        <p>PIN: <span className="font-mono font-bold text-gray-900 bg-yellow-50 px-2 py-1 rounded">{sala.pin_plano}</span></p>
         <p>Capacidad: <span className="font-medium text-gray-700">{sala.capacidad_maxima} usuarios</span></p>
         <p>Inactividad: <span className="font-medium text-gray-700">{sala.timeout_inactividad}s</span></p>
         {sala.tamanio_max_archivo_mb && (

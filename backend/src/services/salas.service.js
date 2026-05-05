@@ -11,14 +11,14 @@ const WorkerPool = require('../utils/worker-pool');
 
 const bcryptPool = new WorkerPool(path.join(__dirname, '../workers/bcrypt.worker.js'));
 
-async function crearSala({ nombre, tipo, max_size_mb, timeout_min, creada_por }) {
-  const pin = generarPin();
-  const pin_hash = await bcryptPool.ejecutar('hash', { plaintext: pin });
+async function crearSala({ nombre, tipo, max_size_mb, timeout_min, creada_por, pin }) {
+  const pin_usar = pin || generarPin(); // Si viene PIN del usuario, usarlo; si no, generar uno
+  const pin_hash = await bcryptPool.ejecutar('hash', { plaintext: pin_usar });
   return SalasRepository.insertar({
     nombre,
     tipo,
     pin_hash,
-    pin_plano: pin,
+    pin_plano: pin_usar,
     max_file_size_mb: max_size_mb,
     timeout_inactividad_min: timeout_min,
     creada_por,
@@ -52,7 +52,9 @@ async function eliminarSala(id) {
 }
 
 async function unirseSala({ pin, nickname, device_id, fingerprint, ip }) {
+  console.log('[UNIRSE] Buscando sala con PIN:', pin);
   const sala = await SalasRepository.buscarPorPin(pin, bcryptPool);
+  console.log('[UNIRSE] Sala encontrada:', sala ? sala.id : 'NO');
   if (!sala) {
     const err = new Error('PIN inválido');
     err.statusCode = 401;

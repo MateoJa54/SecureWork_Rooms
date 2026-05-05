@@ -38,10 +38,14 @@ async function buscarPorId(id) {
 
 async function buscarPorPin(pin, bcryptPool) {
   const { rows } = await pool.query('SELECT * FROM salas WHERE activa = true');
+  console.log('[DB] Salas activas encontradas:', rows.length);
   for (const sala of rows) {
+    console.log(`[DB] Comparando PIN con sala ${sala.id} (nombre: ${sala.nombre})`);
     const match = await bcryptPool.ejecutar('compare', { plaintext: pin, hash: sala.pin_hash });
+    console.log(`[DB] Resultado comparación: ${match}`);
     if (match) return sala;
   }
+  console.log('[DB] No se encontró sala con ese PIN');
   return null;
 }
 

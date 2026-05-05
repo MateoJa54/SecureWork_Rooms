@@ -6,10 +6,23 @@ const api = axios.create({
 });
 
 api.interceptors.request.use(async (config) => {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (session?.access_token) {
-    config.headers.Authorization = `Bearer ${session.access_token}`;
+  // Rutas públicas que NO necesitan autenticación
+  const url = config.url || '';
+  const isPublicRoute = url.includes('unirse');
+  
+  // Solo agregar token si NO es ruta pública
+  if (!isPublicRoute) {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.access_token) {
+        config.headers.Authorization = `Bearer ${session.access_token}`;
+      }
+    } catch (err) {
+      // Si hay error obteniendo la sesión, continuar sin token
+      console.warn('[API] Error obteniendo sesión:', err.message);
+    }
   }
+  
   return config;
 });
 

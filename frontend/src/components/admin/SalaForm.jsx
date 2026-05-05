@@ -29,10 +29,11 @@ export default function SalaForm({ onSubmit, loading }) {
     }
     try {
       const payload = {
-        ...form,
-        capacidad_maxima: Number(form.capacidad_maxima),
-        timeout_inactividad: Number(form.timeout_inactividad),
-        tamanio_max_archivo_mb: form.tamanio_max_archivo_mb ? Number(form.tamanio_max_archivo_mb) : null,
+        nombre: form.nombre,
+        pin: form.pin,
+        tipo: form.tipo_sala,
+        timeout_min: Math.floor(Number(form.timeout_inactividad) / 60),
+        max_size_mb: form.tamanio_max_archivo_mb ? Number(form.tamanio_max_archivo_mb) : 10,
       };
       await onSubmit(payload);
     } catch (err) {

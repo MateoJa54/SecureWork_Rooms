@@ -4,12 +4,13 @@ const SalasService = require('../services/salas.service');
 
 async function crearSala(req, res, next) {
   try {
-    const { nombre, tipo, max_size_mb, timeout_min } = req.body;
+    const { nombre, tipo, max_size_mb, timeout_min, pin } = req.body;
     const sala = await SalasService.crearSala({
       nombre,
       tipo,
       max_size_mb: parseInt(max_size_mb) || 10,
       timeout_min: parseInt(timeout_min) || 5,
+      pin: pin || undefined,
       creada_por: req.admin.id,
     });
     res.status(201).json(sala);
