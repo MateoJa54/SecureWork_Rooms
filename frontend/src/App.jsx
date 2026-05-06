@@ -13,8 +13,8 @@ import ProtectedRoute from './components/common/ProtectedRoute.jsx';
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <AuthProvider>
+    <AuthProvider>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <SocketProvider>
           <Routes>
             <Route path="/" element={<Landing />} />
@@ -49,7 +49,7 @@ export default function App() {
             <Route path="*" element={<Navigate to="/error" replace />} />
           </Routes>
         </SocketProvider>
-      </AuthProvider>
-    </BrowserRouter>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }

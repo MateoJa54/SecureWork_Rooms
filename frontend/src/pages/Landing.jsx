@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom';
 import Button from '../components/common/Button.jsx';
+import { useDeviceId } from '../hooks/useDeviceId.js';
 
 export default function Landing() {
+  useDeviceId();
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-900 to-primary-600 flex flex-col items-center justify-center text-white px-4">
       <div className="max-w-lg w-full text-center space-y-8">

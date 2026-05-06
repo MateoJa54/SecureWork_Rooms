@@ -3,7 +3,8 @@ import Button from '../components/common/Button.jsx';
 
 const MOTIVOS = {
   inactividad: 'Fuiste desconectado por inactividad.',
-  expulsion: 'El administrador te expulsó de la sala.',
+  expulsado: 'El administrador te expulsó de la sala.',
+  sala_cerrada: 'La sala fue cerrada por el administrador.',
   sala_llena: 'La sala está llena. Intenta de nuevo más tarde.',
   pin_invalido: 'PIN incorrecto.',
   dispositivo_duplicado: 'Ya tienes una sesión activa en otra sala.',

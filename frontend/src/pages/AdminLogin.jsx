@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.js';
 import Input from '../components/common/Input.jsx';
 import Button from '../components/common/Button.jsx';
@@ -14,12 +14,19 @@ export default function AdminLogin() {
   const [error, setError] = useState('');
 
   if (user) {
-    navigate('/admin/dashboard', { replace: true });
-    return null;
+    return <Navigate to="/admin/dashboard" replace />;
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      setError('Correo electrónico inválido');
+      return;
+    }
+    if (password.length < 6) {
+      setError('La contraseña debe tener al menos 6 caracteres');
+      return;
+    }
     setError('');
     setLoading(true);
     try {
@@ -58,8 +65,8 @@ export default function AdminLogin() {
             required
             autoComplete="current-password"
           />
-          <Button type="submit" loading={loading} className="w-full">
-            Iniciar sesión
+          <Button type="submit" loading={loading} disabled={loading} className="w-full">
+            {loading ? 'Ingresando...' : 'Iniciar sesión'}
           </Button>
         </form>
       </div>
