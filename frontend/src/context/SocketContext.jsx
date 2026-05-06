@@ -1,7 +1,6 @@
-import { createContext, useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { conectar, desconectar, getSocket } from '../services/socket.service.js';
-
-export const SocketContext = createContext(null);
+import { SocketContext } from './socket-context.js';
 
 export function SocketProvider({ children }) {
   const [connected, setConnected] = useState(false);

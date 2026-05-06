@@ -5,7 +5,7 @@ async function sha256(message) {
   return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 
-export async function generarFingerprint() {
+export async function calcFingerprint() {
   const nav = navigator;
   const attrs = [
     nav.userAgent,
