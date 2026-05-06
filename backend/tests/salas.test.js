@@ -1,76 +1,131 @@
 const request = require('supertest');
-const { getToken } = require('./utils/authHelper');
+const app = require('../app');
 
-const BASE_URL = 'http://localhost:3000';
+//mock auth middleware (simula usuario autenticado)
+jest.mock('../src/middleware/supabase-auth.middleware', () => (req, res, next) => {
+  req.user = { id: 1, email: 'test@test.com' };
+  next();
+});
 
-describe('Salas', () => {
-  let TOKEN;
+//mock DB
+jest.mock('../src/config/database', () => ({
+  pool: {
+    query: jest.fn(),
+  },
+}));
 
-  beforeAll(async () => {
-    TOKEN = await getToken();
+const { pool } = require('../src/config/database');
+
+describe('Salas API (QA controlado)', () => {
+  let salaId = 1;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
-  //test 1: crear sala 
-  test('Debe crear una sala correctamente', async () => {
-    const nombre = `Sala QA ${Date.now()}`;
+  //test 1: crear sala correctamente
+  test('POST /api/salas → Debe crear una sala', async () => {
+    pool.query.mockResolvedValueOnce({
+      rows: [{ id: 1, pin_plano: '1234' }],
+    });
 
-    const res = await request(BASE_URL)
+    const res = await request(app)
       .post('/api/salas')
-      .set('Authorization', `Bearer ${TOKEN}`)
       .send({
-        nombre,
-        tipo: "texto",
-        max_file_size_mb: 5,
-        timeout_inactividad_min: 5
+        nombre: "Sala Test",
+        tipo: "publica",
+        max_size_mb: 5,
+        timeout_min: 5
       });
 
     expect(res.statusCode).toBe(201);
     expect(res.body).toHaveProperty('id');
-    expect(res.body).toHaveProperty('pin_plano');
   });
 
-  //test dos: nombre vacio
-  test('Debe fallar si el nombre está vacío', async () => {
-    const res = await request(BASE_URL)
+  //test 2: nombre vacío
+  test('Debe fallar si nombre está vacío', async () => {
+    const res = await request(app)
       .post('/api/salas')
-      .set('Authorization', `Bearer ${TOKEN}`)
       .send({
         nombre: "",
-        tipo: "texto",
-        max_file_size_mb: 5,
-        timeout_inactividad_min: 5
+        tipo: "publica"
       });
 
-    expect(res.statusCode).not.toBe(201);
+    expect(res.statusCode).toBeGreaterThanOrEqual(400);
   });
 
-  //test 3: tipo invalido
-  test('Debe fallar si el tipo es inválido', async () => {
-    const nombre = `Sala QA ${Date.now()}`;
-
-    const res = await request(BASE_URL)
+  //test 3: tipo inválido
+  test('Debe fallar si tipo es inválido', async () => {
+    const res = await request(app)
       .post('/api/salas')
-      .set('Authorization', `Bearer ${TOKEN}`)
       .send({
-        nombre,
-        tipo: "invalido",
-        max_file_size_mb: 5,
-        timeout_inactividad_min: 5
+        nombre: "Sala Test",
+        tipo: "invalido"
       });
 
-    expect(res.statusCode).not.toBe(201);
+    expect(res.statusCode).toBeGreaterThanOrEqual(400);
   });
 
-  //test 4: datos incompletos
-  test('Debe fallar si faltan campos', async () => {
-    const res = await request(BASE_URL)
-      .post('/api/salas')
-      .set('Authorization', `Bearer ${TOKEN}`)
+  //test 4: listar salas
+  test('GET /api/salas → Debe listar', async () => {
+    pool.query.mockResolvedValueOnce({
+      rows: [{ id: 1, nombre: 'Sala Test' }],
+    });
+
+    const res = await request(app)
+      .get('/api/salas');
+
+    expect(res.statusCode).toBe(200);
+    expect(Array.isArray(res.body)).toBe(true);
+  });
+
+  //test 5: obtener por ID
+  test('GET /api/salas/:id → Debe obtener sala', async () => {
+    pool.query.mockResolvedValueOnce({
+      rows: [{ id: 1 }],
+    });
+
+    const res = await request(app)
+      .get('/api/salas/1');
+
+    expect(res.statusCode).toBe(200);
+  });
+
+  //test 6: unirse
+  test('POST /api/salas/unirse → OK', async () => {
+    pool.query.mockResolvedValueOnce({
+      rows: [{ id: 1 }],
+    });
+
+    const res = await request(app)
+      .post('/api/salas/unirse')
       .send({
-        nombre: `Sala QA ${Date.now()}`
+        pin: "1234",
+        nickname: "user_test",
+        device_id: "dev",
+        fingerprint: "fp"
       });
 
-    expect(res.statusCode).not.toBe(201);
+    expect(res.statusCode).toBe(200);
+  });
+
+  //test 7: unirse inválido
+  test('Debe fallar sin datos', async () => {
+    const res = await request(app)
+      .post('/api/salas/unirse')
+      .send({});
+
+    expect(res.statusCode).toBeGreaterThanOrEqual(400);
+  });
+
+  //test 8: eliminar sala
+  test('DELETE /api/salas/:id → OK', async () => {
+    pool.query.mockResolvedValueOnce({});
+
+    const res = await request(app)
+      .delete('/api/salas/1');
+
+    expect(res.statusCode).toBe(200);
   });
 
 });

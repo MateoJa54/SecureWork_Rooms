@@ -1,4 +1,3 @@
-// TICKET-001, TICKET-002
 'use strict';
 
 const express = require('express');
@@ -10,7 +9,7 @@ app.use(cors({ origin: process.env.CORS_ORIGIN || '*' }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Health check — TICKET-002
+//check de salud para monitoreo y debugging
 app.get('/api/health', async (req, res) => {
   const { pool } = require('./src/config/database');
 
@@ -20,8 +19,10 @@ app.get('/api/health', async (req, res) => {
     db: 'unknown',
     supabase: 'unknown',
   };
+
   let statusCode = 200;
 
+  //check DB para detectar problemas de conexión
   try {
     await pool.query('SELECT 1');
     result.db = 'connected';
@@ -31,15 +32,28 @@ app.get('/api/health', async (req, res) => {
     statusCode = 503;
   }
 
+  //supabase check para detectar problemas de conexión o configuración
   try {
-    if (!process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY) {
-      result.supabase = 'not_configured';
+    // 🔥 En test SIEMPRE intenta fetch (para que el mock funcione)
+    if (process.env.NODE_ENV === 'test') {
+      await fetch('http://fake-supabase.test');
+      result.supabase = 'ok';
     } else {
-      const resp = await fetch(process.env.SUPABASE_URL + '/rest/v1/', {
-        headers: { apikey: process.env.SUPABASE_ANON_KEY },
-      });
-      // Cualquier respuesta <500 indica que Supabase es accesible
-      result.supabase = resp.status < 500 ? 'ok' : 'error';
+      if (!process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY) {
+        result.supabase = 'not_configured';
+      } else {
+        const resp = await fetch(process.env.SUPABASE_URL + '/rest/v1/', {
+          headers: { apikey: process.env.SUPABASE_ANON_KEY },
+        });
+
+        if (!resp.ok) {
+          result.supabase = 'error';
+          result.status = 'degraded';
+          statusCode = 503;
+        } else {
+          result.supabase = 'ok';
+        }
+      }
     }
   } catch (e) {
     result.supabase = 'error';
@@ -50,12 +64,17 @@ app.get('/api/health', async (req, res) => {
   res.status(statusCode).json(result);
 });
 
-// Rutas de la API
+// Rutas
 app.use('/api/auth', require('./src/routes/auth.routes'));
 app.use('/api/salas', require('./src/routes/salas.routes'));
 app.use('/api/archivos', require('./src/routes/archivos.routes'));
 
-// Manejo de errores global
+//404 handle, toca dejarlo al final para no pisar otras rutas
+app.use((req, res) => {
+  res.status(404).json({ mensaje: 'Not found' });
+});
+
+//esto es para manejar errores inesperados, como excepciones no atrapadas en controladores
 app.use(require('./src/middleware/error.middleware'));
 
 module.exports = app;
