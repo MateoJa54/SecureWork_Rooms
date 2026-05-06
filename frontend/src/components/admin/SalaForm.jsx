@@ -5,11 +5,9 @@ import ErrorMessage from '../common/ErrorMessage.jsx';
 
 const DEFAULTS = {
   nombre: '',
-  pin: '',
-  tipo_sala: 'texto',
-  capacidad_maxima: 10,
-  timeout_inactividad: 300,
-  tamanio_max_archivo_mb: '',
+  tipo: 'texto',
+  max_size_mb: 5,
+  timeout_min: 10,
 };
 
 export default function SalaForm({ onSubmit, loading }) {
@@ -20,19 +18,43 @@ export default function SalaForm({ onSubmit, loading }) {
     setForm((prev) => ({ ...prev, [field]: value }));
   }
 
+  function validate() {
+    if (!form.nombre || form.nombre.length < 3) {
+      return 'El nombre debe tener al menos 3 caracteres';
+    }
+    if (form.nombre.length > 100) {
+      return 'El nombre no puede exceder 100 caracteres';
+    }
+    if (form.tipo !== 'texto' && form.tipo !== 'multimedia') {
+      return 'El tipo de sala es inválido';
+    }
+    if (form.tipo === 'multimedia') {
+      const mb = Number(form.max_size_mb);
+      if (!mb || mb < 1 || mb > 10) {
+        return 'El tamaño máximo de archivo debe estar entre 1 y 10 MB';
+      }
+    }
+    const timeout = Number(form.timeout_min);
+    if (!timeout || timeout < 1 || timeout > 60) {
+      return 'El timeout debe estar entre 1 y 60 minutos';
+    }
+    return null;
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
     setError('');
-    if (form.pin.length < 4) {
-      setError('El PIN debe tener al menos 4 caracteres');
+    const validationError = validate();
+    if (validationError) {
+      setError(validationError);
       return;
     }
     try {
       const payload = {
-        ...form,
-        capacidad_maxima: Number(form.capacidad_maxima),
-        timeout_inactividad: Number(form.timeout_inactividad),
-        tamanio_max_archivo_mb: form.tamanio_max_archivo_mb ? Number(form.tamanio_max_archivo_mb) : null,
+        nombre: form.nombre.trim(),
+        tipo: form.tipo,
+        max_size_mb: form.tipo === 'multimedia' ? Number(form.max_size_mb) : undefined,
+        timeout_min: Number(form.timeout_min),
       };
       await onSubmit(payload);
     } catch (err) {
@@ -49,63 +71,46 @@ export default function SalaForm({ onSubmit, loading }) {
         value={form.nombre}
         onChange={(e) => set('nombre', e.target.value)}
         required
+        minLength={3}
         maxLength={100}
         placeholder="Sala de trabajo..."
-      />
-
-      <Input
-        label="PIN de acceso"
-        type="password"
-        value={form.pin}
-        onChange={(e) => set('pin', e.target.value)}
-        required
-        minLength={4}
-        placeholder="Mínimo 4 caracteres"
       />
 
       <div className="flex flex-col gap-1">
         <label className="text-sm font-medium text-gray-700">Tipo de sala</label>
         <select
           className="input-field"
-          value={form.tipo_sala}
-          onChange={(e) => set('tipo_sala', e.target.value)}
+          value={form.tipo}
+          onChange={(e) => set('tipo', e.target.value)}
         >
           <option value="texto">Solo texto</option>
           <option value="multimedia">Multimedia (archivos)</option>
         </select>
       </div>
 
-      <Input
-        label="Capacidad máxima de usuarios"
-        type="number"
-        value={form.capacidad_maxima}
-        onChange={(e) => set('capacidad_maxima', e.target.value)}
-        min={2}
-        max={100}
-        required
-      />
-
-      <Input
-        label="Tiempo de inactividad (segundos)"
-        type="number"
-        value={form.timeout_inactividad}
-        onChange={(e) => set('timeout_inactividad', e.target.value)}
-        min={60}
-        max={3600}
-        required
-      />
-
-      {form.tipo_sala === 'multimedia' && (
+      {form.tipo === 'multimedia' && (
         <Input
           label="Tamaño máximo de archivo (MB)"
           type="number"
-          value={form.tamanio_max_archivo_mb}
-          onChange={(e) => set('tamanio_max_archivo_mb', e.target.value)}
+          value={form.max_size_mb}
+          onChange={(e) => set('max_size_mb', e.target.value)}
           min={1}
-          max={100}
-          placeholder="Ej: 10"
+          max={10}
+          required
+          placeholder="1-10"
         />
       )}
+
+      <Input
+        label="Timeout de inactividad (minutos)"
+        type="number"
+        value={form.timeout_min}
+        onChange={(e) => set('timeout_min', e.target.value)}
+        min={1}
+        max={60}
+        required
+        placeholder="1-60"
+      />
 
       <Button type="submit" loading={loading}>
         Crear sala

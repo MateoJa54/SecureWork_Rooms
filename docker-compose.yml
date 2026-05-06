@@ -49,7 +49,7 @@ services:
   frontend:
     build: ./frontend
     environment:
-      - VITE_API_URL=http://${HOST_IP:-localhost}:3000
+      - VITE_API_URL=http://${HOST_IP:-localhost}:3000/api
       - VITE_SOCKET_URL=http://${HOST_IP:-localhost}:3000
       - VITE_SUPABASE_URL=${SUPABASE_URL}
       - VITE_SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}

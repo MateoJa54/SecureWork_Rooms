@@ -8,7 +8,7 @@ const SesionesRepository = require('../repositories/sesiones.repository');
 const { generarPin } = require('../utils/pin-generator');
 const WorkerPool = require('../utils/worker-pool');
 
-const TIPOS_VALIDOS = ['publica', 'privada'];
+const TIPOS_VALIDOS = ['texto', 'multimedia'];
 
 const bcryptPool =
   process.env.NODE_ENV === 'test'
