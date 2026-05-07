@@ -31,46 +31,76 @@ export default function SalaChat() {
     const sock = connect(sessionToken);
     setSocket(sock);
 
-    sock.on('connect', () => {
+    function handleConnect() {
       setConectado(true);
       sock.emit('sala:join', { sala_id: id });
-    });
-    sock.on('disconnect', () => setConectado(false));
+    }
 
-    sock.on('sala:joined', ({ sala: s, usuarios: us, mensajes_recientes: ms }) => {
+    function handleDisconnect() {
+      setConectado(false);
+    }
+
+    function handleJoined({ sala: s, usuarios: us, mensajes_recientes: ms }) {
       setSala(s);
       setUsuarios(us ?? []);
       setMensajes(ms ?? []);
-    });
+    }
 
-    sock.on('mensaje:nuevo', (msg) => {
+    function handleNuevoMensaje(msg) {
       setMensajes((prev) => [...prev, msg]);
-    });
+    }
 
-    sock.on('usuario:entro', ({ nickname: nick }) => {
+    function handleUsuarioEntro({ nickname: nick }) {
       setUsuarios((prev) => [...prev.filter((u) => u.nickname !== nick), { nickname: nick }]);
-    });
+    }
 
-    sock.on('usuario:salio', ({ nickname: nick }) => {
+    function handleUsuarioSalio({ nickname: nick }) {
       setUsuarios((prev) => prev.filter((u) => u.nickname !== nick));
-    });
+    }
 
-    sock.on('sesion:expulsado', ({ motivo }) => {
+    function handleExpulsado({ motivo }) {
       clearSession();
       disconnect();
       navigate(`/error?motivo=${motivo}`, { replace: true });
-    });
+    }
+
+    function handleConnectError() {
+      clearSession();
+      disconnect();
+      navigate('/unirse', { replace: true });
+    }
+
+    sock.on('connect', handleConnect);
+    sock.on('disconnect', handleDisconnect);
+    sock.on('sala:joined', handleJoined);
+    sock.on('mensaje:nuevo', handleNuevoMensaje);
+    sock.on('usuario:entro', handleUsuarioEntro);
+    sock.on('usuario:salio', handleUsuarioSalio);
+    sock.on('sesion:expulsado', handleExpulsado);
+    sock.on('connect_error', handleConnectError);
+
+    if (sock.connected) {
+      handleConnect();
+    }
 
     return () => {
-      sock.emit('sala:salir');
+      sock.off('connect', handleConnect);
+      sock.off('disconnect', handleDisconnect);
+      sock.off('sala:joined', handleJoined);
+      sock.off('mensaje:nuevo', handleNuevoMensaje);
+      sock.off('usuario:entro', handleUsuarioEntro);
+      sock.off('usuario:salio', handleUsuarioSalio);
+      sock.off('sesion:expulsado', handleExpulsado);
+      sock.off('connect_error', handleConnectError);
     };
-  }, [id]);
+  }, [connect, disconnect, id, navigate, salaIdGuardada, sessionToken]);
 
   const handleSend = useCallback((contenido) => {
     socket?.emit('mensaje:enviar', { sala_id: id, contenido });
   }, [socket, id]);
 
   function handleSalir() {
+    socket?.emit('sala:salir');
     clearSession();
     disconnect();
     navigate('/', { replace: true });
