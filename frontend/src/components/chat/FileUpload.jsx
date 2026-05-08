@@ -2,24 +2,49 @@ import { useRef, useState } from 'react';
 import { subirArchivo } from '../../services/salas.service.js';
 import { formatBytes } from '../../utils/formatters.js';
 
-const ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/pdf', 'text/plain'];
+const ALLOWED_MIME = new Set([
+  'image/jpeg',
+  'image/png',
+  'image/gif',
+  'image/webp',
+  'application/pdf',
+  'text/plain',
+  'text/markdown',
+]);
 
-export default function FileUpload({ salaId, sessionToken, maxMb, onUploaded }) {
+const ALLOWED_EXTENSIONS = new Set(['jpg', 'jpeg', 'png', 'gif', 'webp', 'pdf', 'txt', 'md']);
+const DEFAULT_MAX_MB = 10;
+
+function getFileExtension(fileName) {
+  return fileName.split('.').pop()?.toLowerCase() ?? '';
+}
+
+export default function FileUpload({ salaId, sessionToken, maxMb = DEFAULT_MAX_MB, onUploaded, disabled = false }) {
   const inputRef = useRef(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
 
+  function clearInput() {
+    if (inputRef.current) inputRef.current.value = '';
+  }
+
   async function handleFile(e) {
     const file = e.target.files?.[0];
     if (!file) return;
+
     setError('');
 
-    if (!ALLOWED_MIME.includes(file.type)) {
-      setError('Tipo de archivo no permitido');
+    const extension = getFileExtension(file.name);
+    if (!ALLOWED_MIME.has(file.type) || !ALLOWED_EXTENSIONS.has(extension)) {
+      setError('Tipo no permitido. Usa imagen, PDF, TXT o MD.');
+      clearInput();
       return;
     }
-    if (maxMb && file.size > maxMb * 1024 * 1024) {
-      setError(`El archivo supera el límite de ${maxMb} MB`);
+
+    const maxBytes = maxMb * 1024 * 1024;
+    if (file.size > maxBytes) {
+      setError(`Maximo ${formatBytes(maxBytes)} por archivo.`);
+      clearInput();
       return;
     }
 
@@ -31,26 +56,48 @@ export default function FileUpload({ salaId, sessionToken, maxMb, onUploaded }) 
       setError(err.message);
     } finally {
       setUploading(false);
-      if (inputRef.current) inputRef.current.value = '';
+      clearInput();
     }
   }
 
   return (
-    <div className="flex items-center gap-2">
-      <input ref={inputRef} type="file" className="hidden" onChange={handleFile} accept={ALLOWED_MIME.join(',')} />
+    <div className="relative flex items-center gap-2">
+      <input
+        ref={inputRef}
+        type="file"
+        className="hidden"
+        onChange={handleFile}
+        accept={Array.from(ALLOWED_EXTENSIONS).map((ext) => `.${ext}`).join(',')}
+      />
       <button
         type="button"
         onClick={() => inputRef.current?.click()}
-        disabled={uploading}
-        className="text-gray-500 hover:text-primary-600 disabled:opacity-50"
-        title="Subir archivo"
+        disabled={uploading || disabled}
+        className="flex h-10 w-10 items-center justify-center rounded-full text-slate-500 transition hover:bg-white hover:text-primary-700 disabled:cursor-not-allowed disabled:opacity-40"
+        title={uploading ? 'Subiendo archivo' : 'Subir archivo'}
       >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-        </svg>
+        {uploading ? (
+          <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle className="opacity-25" cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="3" />
+            <path className="opacity-75" fill="currentColor" d="M12 3a9 9 0 0 1 9 9h-3a6 6 0 0 0-6-6V3Z" />
+          </svg>
+        ) : (
+          <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path
+              d="m7.5 12.5 5.6-5.6a3 3 0 1 1 4.24 4.24l-6.7 6.7a4.5 4.5 0 0 1-6.36-6.36l6.7-6.7"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        )}
       </button>
-      {uploading && <span className="text-xs text-gray-400">Subiendo…</span>}
-      {error && <span className="text-xs text-red-500">{error}</span>}
+      {error && (
+        <span className="absolute right-0 top-12 z-10 w-56 rounded-xl border border-red-100 bg-red-50 px-3 py-2 text-xs font-medium text-red-600 shadow-lg">
+          {error}
+        </span>
+      )}
     </div>
   );
 }
