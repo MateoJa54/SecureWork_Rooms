@@ -1,22 +1,22 @@
 const { parentPort } = require('worker_threads');
-const bcrypt = require('bcryptjs');
+const bcrypt = require('bcrypt');
 
 if (parentPort) {
   parentPort.on('message', async (task) => {
-    const { id, operation, data } = task;
+    const { id, type, payload } = task;
 
     try {
       let result;
 
-      switch (operation) {
+      switch (type) {
         case 'hash':
-          result = await bcrypt.hash(data.textoPlano, 10);
+          result = await bcrypt.hash(payload.plaintext, 10);
           break;
 
         case 'compare':
           result = await bcrypt.compare(
-            data.textoPlano,
-            data.hash
+            payload.plaintext,
+            payload.hash
           );
           break;
 

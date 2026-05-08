@@ -3,7 +3,7 @@ import { useRef, useState } from 'react';
 const MAX_CHARS = 2000;
 const TYPING_THROTTLE_MS = 1500;
 
-export default function MessageInput({ onSend, onTyping, disabled }) {
+export default function MessageInput({ onSend, onTyping, disabled, attachment }) {
   const [texto, setTexto] = useState('');
   const lastTypingRef = useRef(0);
 
@@ -36,6 +36,11 @@ export default function MessageInput({ onSend, onTyping, disabled }) {
   return (
     <div className="border-t border-slate-100 bg-white px-4 py-3">
       <div className="flex items-end gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 shadow-sm focus-within:border-primary-300 focus-within:bg-white focus-within:ring-4 focus-within:ring-primary-50">
+        {attachment && (
+          <div className="flex h-11 shrink-0 items-center">
+            {attachment}
+          </div>
+        )}
         <textarea
           className="min-h-[42px] max-h-32 flex-1 resize-none border-0 bg-transparent px-1 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-0"
           placeholder="Escribe un mensaje... Enter para enviar"

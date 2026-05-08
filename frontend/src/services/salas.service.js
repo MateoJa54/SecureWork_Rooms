@@ -30,10 +30,19 @@ export async function unirseSala(payload) {
 
 export async function subirArchivo(salaId, file, sessionToken) {
   const form = new FormData();
-  form.append('archivo', file);
+  form.append('file', file);
   const { data } = await api.post(`/salas/${salaId}/archivos`, form, {
     headers: {
-      'Content-Type': 'multipart/form-data',
+      'X-Session-Token': sessionToken,
+    },
+  });
+  return data;
+}
+
+export async function obtenerArchivoBlob(archivoId, sessionToken) {
+  const { data } = await api.get(`/archivos/${archivoId}`, {
+    responseType: 'blob',
+    headers: {
       'X-Session-Token': sessionToken,
     },
   });

@@ -10,6 +10,36 @@ import FileUpload from '../components/chat/FileUpload.jsx';
 const TYPING_TIMEOUT_MS = 2800;
 const HEARTBEAT_MS = 30000;
 
+function createSystemMessage(event, nick) {
+  return {
+    id: `sistema-${event}-${nick}-${Date.now()}`,
+    tipo: 'sistema',
+    contenido: `${nick} ${event === 'entro' ? 'entro a la sala' : 'salio de la sala'}`,
+    enviado_en: new Date().toISOString(),
+  };
+}
+
+function normalizeArchivoMessage(archivo, fallbackNickname) {
+  const nickname = archivo.nickname ?? archivo.subido_por_nickname ?? fallbackNickname;
+
+  return {
+    id: `archivo-${archivo.id}`,
+    nickname,
+    contenido: '',
+    enviado_en: archivo.subido_en ?? new Date().toISOString(),
+    archivo: {
+      id: archivo.id,
+      nombre: archivo.nombre ?? archivo.nombre_original,
+      nombre_original: archivo.nombre_original ?? archivo.nombre,
+      mime: archivo.mime ?? archivo.mime_type,
+      mime_type: archivo.mime_type ?? archivo.mime,
+      size: archivo.size ?? archivo.tamanio_bytes,
+      tamanio_bytes: archivo.tamanio_bytes ?? archivo.size,
+      subido_en: archivo.subido_en,
+    },
+  };
+}
+
 export default function SalaChat() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -60,8 +90,19 @@ export default function SalaChat() {
       setTypingUsers((prev) => prev.filter((nick) => nick !== msg.nickname));
     }
 
+    function handleArchivoNuevo(archivo) {
+      setMensajes((prev) => {
+        if (prev.some((msg) => msg.archivo?.id === archivo.id)) return prev;
+        return [...prev, normalizeArchivoMessage(archivo, nickname)];
+      });
+      setTypingUsers((prev) => prev.filter((nick) => nick !== (archivo.nickname ?? archivo.subido_por_nickname)));
+    }
+
     function handleUsuarioEntro({ nickname: nick }) {
       setUsuarios((prev) => [...prev.filter((u) => u.nickname !== nick), { nickname: nick }]);
+      if (nick && nick !== nickname) {
+        setMensajes((prev) => [...prev, createSystemMessage('entro', nick)]);
+      }
     }
 
     function handleUsuarioSalio({ nickname: nick }) {
@@ -69,6 +110,9 @@ export default function SalaChat() {
       setTypingUsers((prev) => prev.filter((item) => item !== nick));
       clearTimeout(typingTimers.get(nick));
       typingTimers.delete(nick);
+      if (nick && nick !== nickname) {
+        setMensajes((prev) => [...prev, createSystemMessage('salio', nick)]);
+      }
     }
 
     function handleUsuarioEscribiendo({ nickname: nick }) {
@@ -105,6 +149,7 @@ export default function SalaChat() {
     sock.on('disconnect', handleDisconnect);
     sock.on('sala:joined', handleJoined);
     sock.on('mensaje:nuevo', handleNuevoMensaje);
+    sock.on('archivo:nuevo', handleArchivoNuevo);
     sock.on('usuario:entro', handleUsuarioEntro);
     sock.on('usuario:salio', handleUsuarioSalio);
     sock.on('usuario:escribiendo', handleUsuarioEscribiendo);
@@ -127,6 +172,7 @@ export default function SalaChat() {
       sock.off('disconnect', handleDisconnect);
       sock.off('sala:joined', handleJoined);
       sock.off('mensaje:nuevo', handleNuevoMensaje);
+      sock.off('archivo:nuevo', handleArchivoNuevo);
       sock.off('usuario:entro', handleUsuarioEntro);
       sock.off('usuario:salio', handleUsuarioSalio);
       sock.off('usuario:escribiendo', handleUsuarioEscribiendo);
@@ -206,27 +252,34 @@ export default function SalaChat() {
               </p>
             </div>
 
-            <div className="flex items-center gap-3">
-              {socketError && (
-                <span className="hidden rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-600 sm:inline">
-                  {socketError}
-                </span>
-              )}
-              {sala?.tipo === 'multimedia' && socket && (
-                <FileUpload
-                  salaId={id}
-                  sessionToken={sessionToken}
-                  maxMb={sala.max_file_size_mb ?? sala.tamanio_max_archivo_mb}
-                  onUploaded={(f) => socket?.emit('archivo:notificar', { archivo_id: f.id })}
-                />
-              )}
-            </div>
+            {socketError && (
+              <span className="hidden rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-600 sm:inline">
+                {socketError}
+              </span>
+            )}
           </header>
 
           <div className="flex min-h-0 flex-1">
             <div className="flex min-w-0 flex-1 flex-col">
-              <MessageList mensajes={mensajes} nicknameSelf={nickname} typingUsers={typingUsers} />
-              <MessageInput onSend={handleSend} onTyping={handleTyping} disabled={!conectado} />
+              <MessageList mensajes={mensajes} nicknameSelf={nickname} typingUsers={typingUsers} sessionToken={sessionToken} />
+              <MessageInput
+                onSend={handleSend}
+                onTyping={handleTyping}
+                disabled={!conectado}
+                attachment={sala?.tipo === 'multimedia' && socket ? (
+                  <FileUpload
+                    salaId={id}
+                    sessionToken={sessionToken}
+                    maxMb={sala.max_file_size_mb ?? sala.tamanio_max_archivo_mb}
+                    disabled={!conectado}
+                    onUploaded={(f) => {
+                      setMensajes((prev) => [...prev, normalizeArchivoMessage(f, nickname)]);
+                      socket?.emit('archivo:notificar', { archivo_id: f.id });
+                      socket?.emit('actividad:ping');
+                    }}
+                  />
+                ) : null}
+              />
             </div>
           </div>
         </section>
