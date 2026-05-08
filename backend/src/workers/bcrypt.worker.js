@@ -1,24 +1,38 @@
-// TICKET-009 — Worker Thread para operaciones bcrypt (CPU-intensivas)
-// Corre en un hilo separado, no bloquea el event loop principal
-'use strict';
-
 const { parentPort } = require('worker_threads');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
-const SALT_ROUNDS = 10;
+if (parentPort) {
+  parentPort.on('message', async (task) => {
+    const { id, operation, data } = task;
 
-parentPort.on('message', async ({ id, type, payload }) => {
-  try {
-    let result;
-    if (type === 'hash') {
-      result = await bcrypt.hash(payload.plaintext, SALT_ROUNDS);
-    } else if (type === 'compare') {
-      result = await bcrypt.compare(payload.plaintext, payload.hash);
-    } else {
-      throw new Error(`Operación desconocida: ${type}`);
+    try {
+      let result;
+
+      switch (operation) {
+        case 'hash':
+          result = await bcrypt.hash(data.textoPlano, 10);
+          break;
+
+        case 'compare':
+          result = await bcrypt.compare(
+            data.textoPlano,
+            data.hash
+          );
+          break;
+
+        default:
+          throw new Error('operacion desconocida');
+      }
+
+      parentPort.postMessage({
+        id,
+        result,
+      });
+    } catch (error) {
+      parentPort.postMessage({
+        id,
+        error: error.message,
+      });
     }
-    parentPort.postMessage({ id, result });
-  } catch (err) {
-    parentPort.postMessage({ id, error: err.message });
-  }
-});
+  });
+}
