@@ -53,6 +53,7 @@ export default function SalaChat() {
   const [nickname] = useState(() => getNickname());
   const [conectado, setConectado] = useState(false);
   const [socketError, setSocketError] = useState('');
+  const [expulsionMessage, setExpulsionMessage] = useState('');
   const [showUsers, setShowUsers] = useState(false);
 
   const sessionToken = getSessionToken();
@@ -66,6 +67,7 @@ export default function SalaChat() {
 
     const sock = connect(sessionToken);
     const typingTimers = new Map();
+    let expulsionTimer = null;
     setSocket(sock);
 
     function handleConnect() {
@@ -129,10 +131,21 @@ export default function SalaChat() {
       );
     }
 
-    function handleExpulsado({ motivo }) {
-      clearSession();
-      disconnect();
-      navigate(`/error?motivo=${motivo}`, { replace: true });
+    function handleExpulsado({ motivo, mensaje }) {
+      const fallbackMessage =
+        motivo === 'sala_cerrada'
+          ? 'La sala fue eliminada por el administrador.'
+          : 'El administrador te expulso de la sala.';
+
+      setExpulsionMessage(mensaje ?? fallbackMessage);
+      setConectado(false);
+
+      clearTimeout(expulsionTimer);
+      expulsionTimer = setTimeout(() => {
+        clearSession();
+        disconnect();
+        navigate(`/error?motivo=${motivo ?? 'expulsado'}`, { replace: true });
+      }, 2200);
     }
 
     function handleSocketError(err) {
@@ -167,6 +180,7 @@ export default function SalaChat() {
 
     return () => {
       window.clearInterval(heartbeat);
+      clearTimeout(expulsionTimer);
       typingTimers.forEach((timer) => clearTimeout(timer));
       sock.off('connect', handleConnect);
       sock.off('disconnect', handleDisconnect);
@@ -261,6 +275,11 @@ export default function SalaChat() {
 
           <div className="flex min-h-0 flex-1">
             <div className="flex min-w-0 flex-1 flex-col">
+              {expulsionMessage && (
+                <div className="border-b border-red-100 bg-red-50 px-5 py-3 text-center text-sm font-semibold text-red-700">
+                  {expulsionMessage}
+                </div>
+              )}
               <MessageList mensajes={mensajes} nicknameSelf={nickname} typingUsers={typingUsers} sessionToken={sessionToken} />
               <MessageInput
                 onSend={handleSend}

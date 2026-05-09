@@ -51,6 +51,11 @@ function initSocket(io) {
 
     socket.on('mensaje:enviar', async ({ contenido }) => {
       try {
+        if (socket.data?.motivoSalida) {
+          socket.emit('sesion:expulsado', { motivo: socket.data.motivoSalida });
+          return;
+        }
+
         const mensaje = await MensajesService.procesarMensaje({
           sala_id: sesion.sala_id,
           nickname: sesion.nickname,
@@ -64,11 +69,17 @@ function initSocket(io) {
     });
 
     socket.on('mensaje:typing', () => {
+      if (socket.data?.motivoSalida) return;
       socket.to(`sala_${sesion.sala_id}`).emit('usuario:escribiendo', { nickname: sesion.nickname });
     });
 
     socket.on('archivo:notificar', async ({ archivo_id }) => {
       try {
+        if (socket.data?.motivoSalida) {
+          socket.emit('sesion:expulsado', { motivo: socket.data.motivoSalida });
+          return;
+        }
+
         const ArchivosService = require('../services/archivos.service');
         const archivo = await ArchivosService.obtenerStream(archivo_id);
         io.to(`sala_${sesion.sala_id}`).emit('archivo:nuevo', archivo);
@@ -89,7 +100,7 @@ function initSocket(io) {
 
     socket.on('disconnect', async () => {
       await SesionesService.eliminarSesion(sesion.session_token).catch(() => {});
-      notificarSalida('desconexion');
+      notificarSalida(socket.data?.motivoSalida || 'desconexion');
     });
   });
 }
