@@ -4,6 +4,7 @@ import { SocketProvider } from './context/SocketContext.jsx';
 import Landing from './pages/Landing.jsx';
 import AdminLogin from './pages/AdminLogin.jsx';
 import AdminDashboard from './pages/AdminDashboard.jsx';
+import AdminSalasPorTipo from './pages/AdminSalasPorTipo.jsx';
 import CrearSala from './pages/CrearSala.jsx';
 import DetalleSala from './pages/DetalleSala.jsx';
 import UnirseSala from './pages/UnirseSala.jsx';
@@ -32,6 +33,22 @@ export default function App() {
               element={
                 <ProtectedRoute>
                   <CrearSala />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/salas/texto"
+              element={
+                <ProtectedRoute>
+                  <AdminSalasPorTipo tipo="texto" />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/salas/archivos"
+              element={
+                <ProtectedRoute>
+                  <AdminSalasPorTipo tipo="archivos" />
                 </ProtectedRoute>
               }
             />

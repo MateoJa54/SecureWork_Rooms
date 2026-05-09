@@ -61,7 +61,16 @@ async function obtenerSala(id) {
     throw err;
   }
 
-  return sala;
+  const sesiones =
+    process.env.NODE_ENV === 'test'
+      ? []
+      : await SesionesRepository.listarPorSala(id);
+
+  return {
+    ...sala,
+    sesiones,
+    usuarios_conectados: sesiones.length,
+  };
 }
 
 async function eliminarSala(id) {
@@ -72,6 +81,20 @@ async function eliminarSala(id) {
       const err = new Error('Sala no encontrada');
       err.statusCode = 404;
       throw err;
+    }
+
+    const { getIo } = require('../controllers/socket.controller');
+    const io = getIo();
+    const roomName = `sala_${id}`;
+    const sockets = io ? await io.in(roomName).fetchSockets() : [];
+
+    for (const socket of sockets) {
+      socket.data.motivoSalida = 'sala_cerrada';
+      socket.emit('sesion:expulsado', {
+        motivo: 'sala_cerrada',
+        mensaje: 'La sala fue eliminada por el administrador.',
+      });
+      setTimeout(() => socket.disconnect(true), 150);
     }
   }
 
@@ -152,6 +175,23 @@ async function unirseSala({ pin, nickname, device_id, fingerprint, ip }) {
 
 async function expulsarUsuario(sala_id, nickname) {
   if (process.env.NODE_ENV !== 'test') {
+    const sesion = await SesionesRepository.buscarPorNicknameEnSala(sala_id, nickname);
+
+    if (sesion?.socket_id) {
+      const { getIo } = require('../controllers/socket.controller');
+      const io = getIo();
+      const socket = io?.sockets?.sockets?.get(sesion.socket_id);
+
+      if (socket) {
+        socket.data.motivoSalida = 'expulsado';
+        socket.emit('sesion:expulsado', {
+          motivo: 'expulsado',
+          mensaje: 'El administrador te expulso de la sala.',
+        });
+        setTimeout(() => socket.disconnect(true), 150);
+      }
+    }
+
     await SesionesRepository.eliminarPorNicknameEnSala(sala_id, nickname);
   }
 

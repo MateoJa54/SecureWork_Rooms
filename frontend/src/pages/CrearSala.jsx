@@ -1,9 +1,23 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { crearSala } from '../services/salas.service.js';
+import AdminShell from '../components/admin/AdminShell.jsx';
 import SalaForm from '../components/admin/SalaForm.jsx';
 import Button from '../components/common/Button.jsx';
 import ErrorMessage from '../components/common/ErrorMessage.jsx';
+
+function Icon({ type, className = 'h-5 w-5' }) {
+  const paths = {
+    shield: 'M12 3l7 3v5c0 4.5-2.8 8.3-7 10-4.2-1.7-7-5.5-7-10V6l7-3Z',
+    pin: 'M9 4h6M10 4v6l-3 4h10l-3-4V4M12 14v6',
+  };
+
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d={paths[type]} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
 
 export default function CrearSala() {
   const navigate = useNavigate();
@@ -24,25 +38,37 @@ export default function CrearSala() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b border-gray-200 px-6 py-4">
-        <Link to="/admin/dashboard" className="text-sm text-primary-600 hover:underline">
-          ← Volver al dashboard
-        </Link>
-      </header>
+    <AdminShell>
+      <section className="mx-auto max-w-xl overflow-hidden rounded-lg border border-primary-100 bg-white shadow-xl shadow-primary-900/10">
+        <div className="bg-gradient-to-r from-primary-900 via-primary-700 to-sky-500 px-5 py-4 text-white">
+          <div className="flex items-center gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-primary-700 shadow-lg">
+              <Icon type="shield" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0">
+              <p className="text-xs font-bold uppercase tracking-wide text-blue-100">Nueva sala segura</p>
+              <h1 className="mt-0.5 text-xl font-black">Crear sala</h1>
+            </div>
+          </div>
 
-      <main className="max-w-lg mx-auto px-6 py-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">Nueva sala</h1>
-        <div className="card">
+          <div className="mt-4 rounded-lg bg-white/10 px-3 py-2 ring-1 ring-white/15">
+            <div className="flex items-center gap-2 text-sm font-semibold">
+              <Icon type="pin" className="h-4 w-4" />
+              PIN automatico al guardar
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-slate-50 px-5 py-5">
           <ErrorMessage message={error} />
           <SalaForm onSubmit={handleSubmit} loading={loading} />
-          <div className="mt-4">
-            <Button variant="secondary" className="w-full" onClick={() => navigate('/admin/dashboard')}>
+          <div className="mt-3">
+            <Button variant="secondary" className="w-full py-3 text-sm font-bold" onClick={() => navigate('/admin/dashboard')}>
               Cancelar
             </Button>
           </div>
         </div>
-      </main>
-    </div>
+      </section>
+    </AdminShell>
   );
 }
