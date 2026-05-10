@@ -59,3 +59,7 @@ export function getMaxArchivoMb(sala) {
 export function getFechaCreacion(sala) {
   return sala?.creada_en ?? sala?.creado_en ?? sala?.created_at;
 }
+
+export function getMaxUsuarios(sala) {
+  return sala?.max_usuarios ?? 50;
+}

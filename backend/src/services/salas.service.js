@@ -15,7 +15,7 @@ const bcryptPool =
     ? null
     : new WorkerPool(path.join(__dirname, '../workers/bcrypt.worker.js'));
 
-async function crearSala({ nombre, tipo, max_size_mb, timeout_min, creada_por }) {
+async function crearSala({ nombre, tipo, max_size_mb, timeout_min, max_usuarios, creada_por }) {
   if (!nombre || !tipo) {
     const err = new Error('DATOS_INVALIDOS');
     err.statusCode = 400;
@@ -44,6 +44,7 @@ async function crearSala({ nombre, tipo, max_size_mb, timeout_min, creada_por })
     pin_plano: pin,
     max_file_size_mb: max_size_mb,
     timeout_inactividad_min: timeout_min,
+    max_usuarios,
     creada_por,
   });
 }
@@ -148,6 +149,15 @@ async function unirseSala({ pin, nickname, device_id, fingerprint, ip }) {
     if (nicknameOcupado) {
       const err = new Error('Nickname en uso');
       err.statusCode = 409;
+      throw err;
+    }
+
+    const usuariosActuales = await SesionesRepository.contarPorSala(sala.id);
+    const limite = sala.max_usuarios ?? 50;
+    if (usuariosActuales >= limite) {
+      const err = new Error('Sala llena');
+      err.statusCode = 409;
+      err.codigo = 'SALA_LLENA';
       throw err;
     }
   }

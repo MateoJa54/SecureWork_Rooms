@@ -9,6 +9,7 @@ async function insertar({
   pin_plano,
   max_file_size_mb,
   timeout_inactividad_min,
+  max_usuarios,
   creada_por
 }) {
   if (!nombre || !tipo) {
@@ -24,6 +25,7 @@ async function insertar({
       nombre,
       tipo,
       pin_plano,
+      max_usuarios: max_usuarios ?? 50,
       activa: true
     };
   }
@@ -31,8 +33,8 @@ async function insertar({
   try {
     const result = await pool.query(
       `INSERT INTO salas 
-      (nombre, tipo, pin_hash, pin_plano, max_file_size_mb, timeout_inactividad_min, creada_por)
-      VALUES ($1, $2, $3, $4, $5, $6, $7) 
+      (nombre, tipo, pin_hash, pin_plano, max_file_size_mb, timeout_inactividad_min, max_usuarios, creada_por)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
       RETURNING *`,
       [
         nombre,
@@ -41,6 +43,7 @@ async function insertar({
         pin_plano || null,
         max_file_size_mb ?? 10,
         timeout_inactividad_min ?? 30,
+        max_usuarios ?? 50,
         creada_por || null
       ]
     );

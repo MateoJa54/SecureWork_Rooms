@@ -8,6 +8,7 @@ const DEFAULTS = {
   tipo: 'texto',
   max_size_mb: 5,
   timeout_min: 10,
+  max_usuarios: 50,
 };
 
 function Icon({ type, className = 'h-4 w-4' }) {
@@ -73,6 +74,10 @@ export default function SalaForm({ onSubmit, loading }) {
     if (!timeout || timeout < 1 || timeout > 60) {
       return 'El timeout debe estar entre 1 y 60 minutos';
     }
+    const maxUsr = Number(form.max_usuarios);
+    if (!maxUsr || maxUsr < 1 || maxUsr > 50) {
+      return 'El maximo de usuarios debe estar entre 1 y 50';
+    }
     return null;
   }
 
@@ -90,6 +95,7 @@ export default function SalaForm({ onSubmit, loading }) {
         tipo: form.tipo,
         max_size_mb: form.tipo === 'multimedia' ? Number(form.max_size_mb) : undefined,
         timeout_min: Number(form.timeout_min),
+        max_usuarios: Number(form.max_usuarios),
       };
       await onSubmit(payload);
     } catch (err) {
@@ -156,6 +162,17 @@ export default function SalaForm({ onSubmit, loading }) {
           placeholder="1-60"
         />
       </div>
+
+      <Input
+        label="Maximo de usuarios"
+        type="number"
+        value={form.max_usuarios}
+        onChange={(e) => set('max_usuarios', e.target.value)}
+        min={1}
+        max={50}
+        required
+        placeholder="1-50"
+      />
 
       <Button type="submit" loading={loading} className="w-full py-3 text-sm font-bold">
         Crear sala

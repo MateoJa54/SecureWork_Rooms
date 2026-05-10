@@ -39,6 +39,7 @@ describe('Salas Controller', () => {
         tipo: 'publica',
         max_size_mb: '20',
         timeout_min: '15',
+        max_usuarios: '30',
       },
       admin: {
         id: 99,
@@ -59,6 +60,7 @@ describe('Salas Controller', () => {
       tipo: 'publica',
       max_size_mb: 20,
       timeout_min: 15,
+      max_usuarios: 30,
       creada_por: 99,
     });
 
@@ -92,6 +94,7 @@ describe('Salas Controller', () => {
       tipo: 'privada',
       max_size_mb: 10,
       timeout_min: 5,
+      max_usuarios: 50,
       creada_por: null,
     });
   });

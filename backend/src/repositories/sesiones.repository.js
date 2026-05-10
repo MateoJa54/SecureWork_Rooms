@@ -45,6 +45,14 @@ async function listarPorSala(sala_id) {
   return rows;
 }
 
+async function contarPorSala(sala_id) {
+  const { rows } = await pool.query(
+    'SELECT COUNT(*)::int AS total FROM sesiones_activas WHERE sala_id = $1',
+    [sala_id]
+  );
+  return rows[0]?.total ?? 0;
+}
+
 async function actualizarSocketId(session_token, socket_id) {
   await pool.query(
     'UPDATE sesiones_activas SET socket_id = $1 WHERE session_token = $2',
@@ -99,6 +107,6 @@ async function limpiarInactivas() {
 
 module.exports = {
   insertar, buscarPorDeviceId, buscarPorNicknameEnSala, buscarPorTokenYSala,
-  listarPorSala, actualizarSocketId, actualizarActividad, actualizarActividadPorNickname,
+  listarPorSala, contarPorSala, actualizarSocketId, actualizarActividad, actualizarActividadPorNickname,
   eliminarPorToken, eliminarPorNicknameEnSala, eliminarPorSocketId, limpiarInactivas,
 };
