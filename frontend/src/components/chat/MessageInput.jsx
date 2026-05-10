@@ -1,15 +1,29 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 const MAX_CHARS = 2000;
+const TYPING_THROTTLE_MS = 1500;
 
-export default function MessageInput({ onSend, disabled }) {
+export default function MessageInput({ onSend, onTyping, disabled, attachment }) {
   const [texto, setTexto] = useState('');
+  const lastTypingRef = useRef(0);
+
+  function notifyTyping() {
+    const now = Date.now();
+    if (now - lastTypingRef.current < TYPING_THROTTLE_MS) return;
+    lastTypingRef.current = now;
+    onTyping?.();
+  }
 
   function handleKeyDown(e) {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       submit();
     }
+  }
+
+  function handleChange(e) {
+    setTexto(e.target.value);
+    if (e.target.value.trim()) notifyTyping();
   }
 
   function submit() {
@@ -20,24 +34,40 @@ export default function MessageInput({ onSend, disabled }) {
   }
 
   return (
-    <div className="border-t border-gray-200 bg-white p-3 flex gap-2 items-end">
-      <textarea
-        className="flex-1 input-field resize-none min-h-[40px] max-h-32"
-        placeholder="Escribe un mensaje… (Enter para enviar)"
-        value={texto}
-        maxLength={MAX_CHARS}
-        onChange={(e) => setTexto(e.target.value)}
-        onKeyDown={handleKeyDown}
-        disabled={disabled}
-        rows={1}
-      />
-      <button
-        onClick={submit}
-        disabled={!texto.trim() || disabled}
-        className="btn-primary px-4 py-2 shrink-0"
-      >
-        Enviar
-      </button>
+    <div className="border-t border-slate-100 bg-white px-2 py-2 sm:px-4 sm:py-3">
+      <div className="flex items-end gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-2 py-2 shadow-sm focus-within:border-primary-300 focus-within:bg-white focus-within:ring-4 focus-within:ring-primary-50 sm:gap-3 sm:px-3">
+        {attachment && (
+          <div className="flex h-11 shrink-0 items-center">
+            {attachment}
+          </div>
+        )}
+        <textarea
+          className="min-h-[42px] max-h-32 min-w-0 flex-1 resize-none border-0 bg-transparent px-1 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-0"
+          placeholder="Escribe un mensaje... Enter para enviar"
+          value={texto}
+          maxLength={MAX_CHARS}
+          onChange={handleChange}
+          onKeyDown={handleKeyDown}
+          disabled={disabled}
+          rows={1}
+        />
+        <button
+          onClick={submit}
+          disabled={!texto.trim() || disabled}
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-primary-700 to-sky-500 text-white shadow-lg shadow-primary-600/25 transition hover:from-primary-800 hover:to-sky-600 disabled:cursor-not-allowed disabled:opacity-40 sm:h-11 sm:w-11"
+          title="Enviar mensaje"
+        >
+          <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path
+              d="M5 12h13M13 6l6 6-6 6"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
+      </div>
     </div>
   );
 }

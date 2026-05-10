@@ -6,6 +6,16 @@ const { Server } = require('socket.io');
 const app = require('./app');
 const { initSocket } = require('./src/controllers/socket.controller');
 
+process.on('uncaughtException', (err) => {
+  console.error('[FATAL] Uncaught Exception:', err.message);
+  console.error(err.stack);
+});
+
+process.on('unhandledRejection', (err) => {
+  console.error('[FATAL] Unhandled Rejection:', err?.message || err);
+  console.error(err?.stack);
+});
+
 const PORT = parseInt(process.env.PORT || '3000');
 const HOST = process.env.HOST || '0.0.0.0';
 

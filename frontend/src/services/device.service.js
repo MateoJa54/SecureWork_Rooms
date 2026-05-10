@@ -1,4 +1,4 @@
-import { generarFingerprint } from '../utils/fingerprint.js';
+import { calcFingerprint } from '../utils/fingerprint.js';
 
 const DEVICE_KEY = 'swr_device_id';
 const SESSION_KEY = 'swr_session_token';
@@ -15,7 +15,7 @@ export function getDeviceId() {
 }
 
 export async function getFingerprint() {
-  return generarFingerprint();
+  return calcFingerprint();
 }
 
 export function saveSession(sessionToken, salaId, nickname) {

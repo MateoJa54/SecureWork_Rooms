@@ -8,14 +8,14 @@ const SesionesRepository = require('../repositories/sesiones.repository');
 const { generarPin } = require('../utils/pin-generator');
 const WorkerPool = require('../utils/worker-pool');
 
-const TIPOS_VALIDOS = ['publica', 'privada'];
+const TIPOS_VALIDOS = ['texto', 'multimedia'];
 
 const bcryptPool =
   process.env.NODE_ENV === 'test'
     ? null
     : new WorkerPool(path.join(__dirname, '../workers/bcrypt.worker.js'));
 
-async function crearSala({ nombre, tipo, max_size_mb, timeout_min, creada_por }) {
+async function crearSala({ nombre, tipo, max_size_mb, timeout_min, max_usuarios, creada_por }) {
   if (!nombre || !tipo) {
     const err = new Error('DATOS_INVALIDOS');
     err.statusCode = 400;
@@ -44,6 +44,7 @@ async function crearSala({ nombre, tipo, max_size_mb, timeout_min, creada_por })
     pin_plano: pin,
     max_file_size_mb: max_size_mb,
     timeout_inactividad_min: timeout_min,
+    max_usuarios,
     creada_por,
   });
 }
@@ -61,7 +62,16 @@ async function obtenerSala(id) {
     throw err;
   }
 
-  return sala;
+  const sesiones =
+    process.env.NODE_ENV === 'test'
+      ? []
+      : await SesionesRepository.listarPorSala(id);
+
+  return {
+    ...sala,
+    sesiones,
+    usuarios_conectados: sesiones.length,
+  };
 }
 
 async function eliminarSala(id) {
@@ -72,6 +82,20 @@ async function eliminarSala(id) {
       const err = new Error('Sala no encontrada');
       err.statusCode = 404;
       throw err;
+    }
+
+    const { getIo } = require('../controllers/socket.controller');
+    const io = getIo();
+    const roomName = `sala_${id}`;
+    const sockets = io ? await io.in(roomName).fetchSockets() : [];
+
+    for (const socket of sockets) {
+      socket.data.motivoSalida = 'sala_cerrada';
+      socket.emit('sesion:expulsado', {
+        motivo: 'sala_cerrada',
+        mensaje: 'La sala fue eliminada por el administrador.',
+      });
+      setTimeout(() => socket.disconnect(true), 150);
     }
   }
 
@@ -127,6 +151,15 @@ async function unirseSala({ pin, nickname, device_id, fingerprint, ip }) {
       err.statusCode = 409;
       throw err;
     }
+
+    const usuariosActuales = await SesionesRepository.contarPorSala(sala.id);
+    const limite = sala.max_usuarios ?? 50;
+    if (usuariosActuales >= limite) {
+      const err = new Error('Sala llena');
+      err.statusCode = 409;
+      err.codigo = 'SALA_LLENA';
+      throw err;
+    }
   }
 
   const session_token = uuidv4();
@@ -152,6 +185,23 @@ async function unirseSala({ pin, nickname, device_id, fingerprint, ip }) {
 
 async function expulsarUsuario(sala_id, nickname) {
   if (process.env.NODE_ENV !== 'test') {
+    const sesion = await SesionesRepository.buscarPorNicknameEnSala(sala_id, nickname);
+
+    if (sesion?.socket_id) {
+      const { getIo } = require('../controllers/socket.controller');
+      const io = getIo();
+      const socket = io?.sockets?.sockets?.get(sesion.socket_id);
+
+      if (socket) {
+        socket.data.motivoSalida = 'expulsado';
+        socket.emit('sesion:expulsado', {
+          motivo: 'expulsado',
+          mensaje: 'El administrador te expulso de la sala.',
+        });
+        setTimeout(() => socket.disconnect(true), 150);
+      }
+    }
+
     await SesionesRepository.eliminarPorNicknameEnSala(sala_id, nickname);
   }
 

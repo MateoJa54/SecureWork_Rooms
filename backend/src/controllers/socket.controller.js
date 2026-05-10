@@ -25,6 +25,16 @@ function initSocket(io) {
 
   io.on('connection', (socket) => {
     const { sesion } = socket;
+    let salidaNotificada = false;
+
+    function notificarSalida(motivo) {
+      if (salidaNotificada) return;
+      salidaNotificada = true;
+      socket.to(`sala_${sesion.sala_id}`).emit('usuario:salio', {
+        nickname: sesion.nickname,
+        motivo,
+      });
+    }
 
     socket.on('sala:join', async ({ sala_id }) => {
       try {
@@ -41,6 +51,11 @@ function initSocket(io) {
 
     socket.on('mensaje:enviar', async ({ contenido }) => {
       try {
+        if (socket.data?.motivoSalida) {
+          socket.emit('sesion:expulsado', { motivo: socket.data.motivoSalida });
+          return;
+        }
+
         const mensaje = await MensajesService.procesarMensaje({
           sala_id: sesion.sala_id,
           nickname: sesion.nickname,
@@ -54,11 +69,17 @@ function initSocket(io) {
     });
 
     socket.on('mensaje:typing', () => {
+      if (socket.data?.motivoSalida) return;
       socket.to(`sala_${sesion.sala_id}`).emit('usuario:escribiendo', { nickname: sesion.nickname });
     });
 
     socket.on('archivo:notificar', async ({ archivo_id }) => {
       try {
+        if (socket.data?.motivoSalida) {
+          socket.emit('sesion:expulsado', { motivo: socket.data.motivoSalida });
+          return;
+        }
+
         const ArchivosService = require('../services/archivos.service');
         const archivo = await ArchivosService.obtenerStream(archivo_id);
         io.to(`sala_${sesion.sala_id}`).emit('archivo:nuevo', archivo);
@@ -73,19 +94,13 @@ function initSocket(io) {
 
     socket.on('sala:salir', async () => {
       await SesionesService.eliminarSesion(sesion.session_token).catch(() => {});
-      socket.to(`sala_${sesion.sala_id}`).emit('usuario:salio', {
-        nickname: sesion.nickname,
-        motivo: 'voluntario',
-      });
+      notificarSalida('voluntario');
       socket.disconnect();
     });
 
     socket.on('disconnect', async () => {
       await SesionesService.eliminarSesion(sesion.session_token).catch(() => {});
-      io.to(`sala_${sesion.sala_id}`).emit('usuario:salio', {
-        nickname: sesion.nickname,
-        motivo: 'desconexion',
-      });
+      notificarSalida(socket.data?.motivoSalida || 'desconexion');
     });
   });
 }

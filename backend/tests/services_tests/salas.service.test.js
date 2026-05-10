@@ -9,6 +9,7 @@ jest.mock('../../src/repositories/salas.repository', () => ({
 jest.mock('../../src/repositories/sesiones.repository', () => ({
   buscarPorDeviceId: jest.fn(),
   buscarPorNicknameEnSala: jest.fn(),
+  contarPorSala: jest.fn(),
   insertar: jest.fn(),
   eliminarPorNicknameEnSala: jest.fn(),
 }));
@@ -64,6 +65,7 @@ describe('Salas Service', () => {
       pin_plano: '1234',
       max_file_size_mb: 20,
       timeout_inactividad_min: 10,
+      max_usuarios: undefined,
       creada_por: 1,
     });
 
@@ -254,6 +256,7 @@ describe('Salas Service', () => {
     SalasRepository.buscarPorPin.mockResolvedValue({
       id: 1,
       tipo: 'publica',
+      max_usuarios: 50,
     });
 
     SesionesRepository.buscarPorDeviceId.mockResolvedValue(null);
@@ -277,11 +280,14 @@ describe('Salas Service', () => {
     SalasRepository.buscarPorPin.mockResolvedValue({
       id: 1,
       tipo: 'publica',
+      max_usuarios: 50,
     });
 
     SesionesRepository.buscarPorDeviceId.mockResolvedValue(null);
 
     SesionesRepository.buscarPorNicknameEnSala.mockResolvedValue(null);
+
+    SesionesRepository.contarPorSala.mockResolvedValue(0);
 
     SesionesRepository.insertar.mockResolvedValue({
       id: 1,
@@ -298,6 +304,33 @@ describe('Salas Service', () => {
     expect(SesionesRepository.insertar).toHaveBeenCalled();
 
     expect(result.sala_id).toBe(1);
+  });
+
+  // sala llena
+  test('debe rechazar si sala esta llena', async () => {
+    process.env.NODE_ENV = 'production';
+
+    SalasRepository.buscarPorPin.mockResolvedValue({
+      id: 1,
+      tipo: 'publica',
+      max_usuarios: 5,
+    });
+
+    SesionesRepository.buscarPorDeviceId.mockResolvedValue(null);
+
+    SesionesRepository.buscarPorNicknameEnSala.mockResolvedValue(null);
+
+    SesionesRepository.contarPorSala.mockResolvedValue(5);
+
+    await expect(
+      unirseSala({
+        pin: '1234',
+        nickname: 'eduardo',
+        device_id: 'dev1',
+        fingerprint: 'fp1',
+        ip: '127.0.0.1',
+      })
+    ).rejects.toThrow('Sala llena');
   });
 
   // expulsar usuario en produccion

@@ -53,6 +53,7 @@ describe('Salas Repository', () => {
       nombre: 'Sala Test',
       tipo: 'publica',
       pin_plano: '1234',
+      max_usuarios: 50,
       activa: true,
     });
   });

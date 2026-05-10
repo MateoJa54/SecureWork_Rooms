@@ -4,6 +4,7 @@ import { SocketProvider } from './context/SocketContext.jsx';
 import Landing from './pages/Landing.jsx';
 import AdminLogin from './pages/AdminLogin.jsx';
 import AdminDashboard from './pages/AdminDashboard.jsx';
+import AdminSalasPorTipo from './pages/AdminSalasPorTipo.jsx';
 import CrearSala from './pages/CrearSala.jsx';
 import DetalleSala from './pages/DetalleSala.jsx';
 import UnirseSala from './pages/UnirseSala.jsx';
@@ -13,8 +14,8 @@ import ProtectedRoute from './components/common/ProtectedRoute.jsx';
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <AuthProvider>
+    <AuthProvider>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <SocketProvider>
           <Routes>
             <Route path="/" element={<Landing />} />
@@ -36,6 +37,22 @@ export default function App() {
               }
             />
             <Route
+              path="/admin/salas/texto"
+              element={
+                <ProtectedRoute>
+                  <AdminSalasPorTipo tipo="texto" />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/salas/archivos"
+              element={
+                <ProtectedRoute>
+                  <AdminSalasPorTipo tipo="archivos" />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/admin/salas/:id"
               element={
                 <ProtectedRoute>
@@ -49,7 +66,7 @@ export default function App() {
             <Route path="*" element={<Navigate to="/error" replace />} />
           </Routes>
         </SocketProvider>
-      </AuthProvider>
-    </BrowserRouter>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }

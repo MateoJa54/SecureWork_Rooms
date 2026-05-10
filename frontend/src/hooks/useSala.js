@@ -6,9 +6,9 @@ export function useSala(id) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const cargar = useCallback(async () => {
+  const cargar = useCallback(async ({ silent = false } = {}) => {
     if (!id) return;
-    setLoading(true);
+    if (!silent) setLoading(true);
     setError(null);
     try {
       const data = await obtenerSala(id);
@@ -16,7 +16,7 @@ export function useSala(id) {
     } catch (err) {
       setError(err.message);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, [id]);
 
