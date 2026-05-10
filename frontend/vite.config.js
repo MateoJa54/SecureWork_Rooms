@@ -37,10 +37,13 @@ export default defineConfig({
       reportsDirectory: './coverage',
 
       exclude: [
-        'node_modules/',
-        'src/tests/',
-        'dist/',
-      ],
+      'node_modules/',
+      'src/tests/',
+      'dist/',
+      'vite.config.js',
+      'tailwind.config.js',
+      'postcss.config.js',
+    ],
     },
   },
 });

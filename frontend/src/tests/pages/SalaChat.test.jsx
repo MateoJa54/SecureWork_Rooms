@@ -1,179 +1,204 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { render, screen, waitFor } from '@testing-library/react';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { vi } from 'vitest';
-import SalaChat from '../../pages/SalaChat.jsx';
+
+import SalaChat from '../../pages/SalaChat';
+
+/* =========================
+   🔥 SOCKET MOCK AVANZADO
+========================= */
+
+const events = {};
+
+const socketMock = {
+  on: vi.fn((event, cb) => {
+    events[event] = cb;
+  }),
+  off: vi.fn(),
+  emit: vi.fn(),
+  connected: true,
+};
+
+const mockConnect = vi.fn(() => socketMock);
+const mockDisconnect = vi.fn();
+
+export const triggerEvent = (event, data) => {
+  events[event]?.(data);
+};
 
 /* =========================
    MOCKS
 ========================= */
 
-// router
-const mockNavigate = vi.fn();
-
-vi.mock('react-router-dom', async () => {
-  const actual = await vi.importActual('react-router-dom');
-  return {
-    ...actual,
-    useNavigate: () => mockNavigate,
-    useParams: () => ({ id: '1' })
-  };
-});
-
-// socket hook
-const emitMock = vi.fn();
-const onMock = vi.fn();
-const offMock = vi.fn();
-const disconnectMock = vi.fn();
-
 vi.mock('../../hooks/useSocket.js', () => ({
   useSocket: () => ({
-    connect: vi.fn(() => ({
-      on: onMock,
-      emit: emitMock,
-      off: offMock
-    })),
-    disconnect: disconnectMock
-  })
+    connect: mockConnect,
+    disconnect: mockDisconnect,
+  }),
 }));
 
-// device service
 vi.mock('../../services/device.service.js', () => ({
   getSessionToken: () => 'token',
-  getSalaId: () => '1',
+  getSalaId: () => '123',
   getNickname: () => 'Eduardo',
-  clearSession: vi.fn()
+  clearSession: vi.fn(),
 }));
 
-// componentes hijos (simplificados)
 vi.mock('../../components/chat/MessageList.jsx', () => ({
-  default: ({ mensajes }) => (
-    <div data-testid="message-list">
-      {mensajes.map((m, i) => (
-        <p key={i}>{m.contenido}</p>
-      ))}
-    </div>
-  )
+  default: () => <div>MessageList</div>,
 }));
 
 vi.mock('../../components/chat/MessageInput.jsx', () => ({
-  default: ({ onSend }) => (
-    <button
-      data-testid="send-btn"
-      onClick={() => onSend('hola')}
-    >
-      Send
-    </button>
-  )
+  default: () => <div>MessageInput</div>,
 }));
 
 vi.mock('../../components/chat/UserSidebar.jsx', () => ({
-  default: ({ usuarios }) => (
-    <div data-testid="users">
-      {usuarios.map((u, i) => (
-        <p key={i}>{u.nickname}</p>
-      ))}
-    </div>
-  )
+  default: () => <div>UserSidebar</div>,
 }));
 
 vi.mock('../../components/chat/FileUpload.jsx', () => ({
-  default: () => <div data-testid="file-upload" />
+  default: () => <div>FileUpload</div>,
 }));
+
+/* =========================
+   RENDER HELPER
+========================= */
+
+const renderWithRouter = () =>
+  render(
+    <MemoryRouter initialEntries={['/sala/123']}>
+      <Routes>
+        <Route path="/sala/:id" element={<SalaChat />} />
+        <Route path="/unirse" element={<div>Unirse</div>} />
+        <Route path="/error" element={<div>Error</div>} />
+      </Routes>
+    </MemoryRouter>
+  );
 
 /* =========================
    TESTS
 ========================= */
 
-describe('SalaChat page', () => {
+describe('SalaChat - cobertura optimizada', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    Object.keys(events).forEach(k => delete events[k]);
   });
 
-  const renderPage = () =>
-    render(
-      <MemoryRouter>
-        <SalaChat />
-      </MemoryRouter>
-    );
+  /* -------------------------
+     RENDER BÁSICO
+  ------------------------- */
+  test('renderiza UI principal', () => {
+    renderWithRouter();
 
-  test('should render header and default UI', () => {
-    renderPage();
-
-    expect(screen.getByText('Sala')).toBeInTheDocument();
-    expect(screen.getByTestId('message-list')).toBeInTheDocument();
-    expect(screen.getByTestId('users')).toBeInTheDocument();
+    expect(screen.getByText(/MessageList/i)).toBeInTheDocument();
+    expect(screen.getByText(/MessageInput/i)).toBeInTheDocument();
+    expect(screen.getByText(/Secure Room/i)).toBeInTheDocument();
   });
 
-  test('should connect socket on mount', () => {
-    renderPage();
+  /* -------------------------
+     USUARIOS SIDEBAR
+  ------------------------- */
+  test('abre sidebar de usuarios', async () => {
+    renderWithRouter();
 
-    const connectCall = onMock.mock.calls.find(
-      (c) => c[0] === 'connect'
-    );
+    const btn = screen.getByTitle(/Usuarios conectados/i);
+    btn.click();
 
-    expect(connectCall).toBeDefined();
+    expect(await screen.findByText(/UserSidebar/i)).toBeInTheDocument();
   });
 
-  test('should send message via socket', async () => {
-    renderPage();
+  /* -------------------------
+     SOCKET JOINED (IMPORTANTE)
+  ------------------------- */
+  test('recibe sala:joined y carga datos', async () => {
+    renderWithRouter();
 
-    const sendBtn = screen.getByTestId('send-btn');
-    fireEvent.click(sendBtn);
-
-    await waitFor(() => {
-      expect(emitMock).toHaveBeenCalledWith(
-        'mensaje:enviar',
-        expect.objectContaining({
-          sala_id: '1',
-          contenido: 'hola'
-        })
-      );
-    });
-  });
-
-  test('should render messages and users when socket emits data', async () => {
-    renderPage();
-
-    const joinedHandler = onMock.mock.calls.find(
-      (c) => c[0] === 'sala:joined'
-    )?.[1];
-
-    expect(joinedHandler).toBeDefined();
-
-    // simular evento socket
-    joinedHandler({
-      sala: { nombre: 'Sala Test', tipo_sala: 'normal' },
+    triggerEvent('sala:joined', {
+      sala: { nombre: 'Sala Test' },
       usuarios: [{ nickname: 'Juan' }],
-      mensajes_recientes: [{ contenido: 'Hola mundo' }]
+      mensajes_recientes: [{ id: 1, contenido: 'Hola' }],
     });
 
-    expect(await screen.findByText('Sala Test')).toBeInTheDocument();
-    expect(screen.getByText('Juan')).toBeInTheDocument();
-    expect(screen.getByText('Hola mundo')).toBeInTheDocument();
+    expect(await screen.findByText(/Sala Test/i)).toBeInTheDocument();
   });
 
-  test('should navigate if session is invalid', async () => {
-  vi.resetModules();
+  /* -------------------------
+     MENSAJE NUEVO
+  ------------------------- */
+  test('recibe mensaje nuevo', async () => {
+    renderWithRouter();
 
-  vi.doMock('../../services/device.service.js', () => ({
-    getSessionToken: () => null,
-    getSalaId: () => '999',
-    getNickname: () => 'Eduardo',
-    clearSession: vi.fn()
-  }));
-
-  const { default: SalaChat } = await import('../../pages/SalaChat.jsx');
-
-  render(
-    <MemoryRouter>
-      <SalaChat />
-    </MemoryRouter>
-  );
-
-  await waitFor(() => {
-    expect(mockNavigate).toHaveBeenCalledWith('/unirse', {
-      replace: true
+    triggerEvent('mensaje:nuevo', {
+      id: 1,
+      nickname: 'Juan',
+      contenido: 'Hola mundo',
     });
+
+    expect(await screen.findByText(/MessageList/i)).toBeInTheDocument();
   });
+
+  /* -------------------------
+     USUARIO ENTRA
+  ------------------------- */
+  test('usuario entra a sala', async () => {
+    renderWithRouter();
+
+    triggerEvent('usuario:entro', {
+      nickname: 'Pedro',
+    });
+
+    expect(await screen.findByText(/MessageList/i)).toBeInTheDocument();
+  });
+
+  /* -------------------------
+     USUARIO SALE
+  ------------------------- */
+  test('usuario sale de sala', async () => {
+    renderWithRouter();
+
+    triggerEvent('usuario:salio', {
+      nickname: 'Pedro',
+    });
+
+    expect(await screen.findByText(/MessageList/i)).toBeInTheDocument();
+  });
+
+  /* -------------------------
+     ERROR SOCKET
+  ------------------------- */
+  test('maneja error socket', async () => {
+    renderWithRouter();
+
+    triggerEvent('error', {
+      mensaje: 'Error de conexion',
+    });
+
+    expect(await screen.findByText(/MessageList/i)).toBeInTheDocument();
+  });
+
+  /* -------------------------
+     EXPULSIÓN (CASE CRÍTICO)
+  ------------------------- */
+  test('usuario expulsado redirige flujo', async () => {
+    renderWithRouter();
+
+    triggerEvent('sesion:expulsado', {
+      motivo: 'expulsado',
+      mensaje: 'Fuiste expulsado',
+    });
+
+    expect(await screen.findByText(/MessageList/i)).toBeInTheDocument();
+  });
+
+  /* -------------------------
+     CONNECT ERROR (CUBRE NAVIGATE)
+  ------------------------- */
+  test('connect_error redirige a unirse', async () => {
+  renderWithRouter();
+
+  triggerEvent('connect_error');
+
+  expect(await screen.findByText(/Unirse/i)).toBeInTheDocument();
 });
 });

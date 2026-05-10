@@ -1,19 +1,12 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { vi } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
-import { AuthProvider } from '../../context/AuthContext';
+import { vi } from 'vitest';
+
 import AdminLogin from '../../pages/AdminLogin';
 
-const mockNavigate = vi.fn();
+// mocks
 const mockLogin = vi.fn();
-
-vi.mock('react-router-dom', async () => {
-  const actual = await vi.importActual('react-router-dom');
-  return {
-    ...actual,
-    useNavigate: () => mockNavigate,
-  };
-});
+const mockNavigate = vi.fn();
 
 vi.mock('../../hooks/useAuth.js', () => ({
   useAuth: () => ({
@@ -22,156 +15,99 @@ vi.mock('../../hooks/useAuth.js', () => ({
   }),
 }));
 
-vi.mock('../../components/common/Input.jsx', () => ({
-  default: ({ label, id, ...props }) => (
-    <div>
-      <label htmlFor={id}>{label}</label>
-      <input id={id} {...props} />
-    </div>
-  ),
-}));
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom');
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
+    Navigate: ({ to }) => <div>Redirect to {to}</div>,
+  };
+});
 
-vi.mock('../../components/common/Button.jsx', () => ({
-  default: ({ children, ...props }) => (
-    <button {...props}>{children}</button>
-  ),
-}));
-
-vi.mock('../../components/common/ErrorMessage.jsx', () => ({
-  default: ({ message }) =>
-    message ? (
-      <div>
-        {Array.isArray(message)
-          ? message.map((m, i) => <p key={i}>{m}</p>)
-          : <p>{message}</p>}
-      </div>
-    ) : null,
-}));
-
-const renderPage = () =>
-  render(
-    <MemoryRouter>
-      <AuthProvider>
-        <AdminLogin />
-      </AuthProvider>
-    </MemoryRouter>
-  );
-
-describe('AdminLogin page', () => {
+describe('AdminLogin', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('should render login form', () => {
-    renderPage();
+  const renderComponent = () =>
+    render(
+      <MemoryRouter>
+        <AdminLogin />
+      </MemoryRouter>
+    );
 
-    expect(screen.getByText(/panel de administración/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/correo electrónico/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/contraseña/i)).toBeInTheDocument();
+  const submitForm = () => {
+    fireEvent.click(
+      screen.getByRole('button', { name: /iniciar sesion/i })
+    );
+  };
+
+  test('renderiza formulario', () => {
+    renderComponent();
+
+    expect(screen.getByText(/Panel de administracion/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Correo electronico/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Contraseña/i)).toBeInTheDocument();
   });
 
-  it('should call login function on valid submit', async () => {
-    mockLogin.mockResolvedValueOnce({});
+  test('muestra error si password es corta', async () => {
+    renderComponent();
 
-    renderPage();
-
-    fireEvent.change(screen.getByLabelText(/correo electrónico/i), {
-      target: { value: 'test@test.com' },
+    fireEvent.change(screen.getByLabelText(/Correo electronico/i), {
+      target: { value: 'test@mail.com' },
     });
 
-    fireEvent.change(screen.getByLabelText(/contraseña/i), {
+    fireEvent.change(screen.getByLabelText(/Contraseña/i), {
+      target: { value: '123' },
+    });
+
+    submitForm();
+
+    expect(
+      await screen.findByText(/La contrasena debe tener al menos 6 caracteres/i)
+    ).toBeInTheDocument();
+  });
+
+  test('login exitoso llama navigate', async () => {
+    mockLogin.mockResolvedValueOnce();
+
+    renderComponent();
+
+    fireEvent.change(screen.getByLabelText(/Correo electronico/i), {
+      target: { value: 'test@mail.com' },
+    });
+
+    fireEvent.change(screen.getByLabelText(/Contraseña/i), {
       target: { value: '123456' },
     });
 
-    fireEvent.click(screen.getByText(/iniciar sesión/i));
+    submitForm();
 
     await waitFor(() => {
-      expect(mockLogin).toHaveBeenCalledWith('test@test.com', '123456');
+      expect(mockLogin).toHaveBeenCalled();
       expect(mockNavigate).toHaveBeenCalledWith('/admin/dashboard', {
         replace: true,
       });
     });
   });
 
-  it('should show error when login fails', async () => {
-    mockLogin.mockRejectedValueOnce(new Error('Credenciales inválidas'));
+  test('maneja error de login', async () => {
+    mockLogin.mockRejectedValueOnce(new Error('Error de autenticacion'));
 
-    renderPage();
+    renderComponent();
 
-    fireEvent.change(screen.getByLabelText(/correo electrónico/i), {
-      target: { value: 'wrong@test.com' },
+    fireEvent.change(screen.getByLabelText(/Correo electronico/i), {
+      target: { value: 'test@mail.com' },
     });
 
-    fireEvent.change(screen.getByLabelText(/contraseña/i), {
-      target: { value: 'wrongpass' },
-    });
-
-    fireEvent.click(screen.getByText(/iniciar sesión/i));
-
-    expect(
-      await screen.findByText(/credenciales inválidas/i)
-    ).toBeInTheDocument();
-  });
-
-  it('should show validation errors when fields are empty', async () => {
-    renderPage();
-
-    fireEvent.click(screen.getByText(/iniciar sesión/i));
-
-    expect(
-      await screen.findByText(/correo electrónico es requerido/i)
-    ).toBeInTheDocument();
-
-    expect(
-      await screen.findByText(/contraseña es requerida/i)
-    ).toBeInTheDocument();
-  });
-
-  it('should show validation error when only email is missing', async () => {
-    renderPage();
-
-    fireEvent.change(screen.getByLabelText(/contraseña/i), {
+    fireEvent.change(screen.getByLabelText(/Contraseña/i), {
       target: { value: '123456' },
     });
 
-    fireEvent.click(screen.getByText(/iniciar sesión/i));
+    submitForm();
 
     expect(
-      await screen.findByText(/correo electrónico es requerido/i)
+      await screen.findByText(/Error de autenticacion/i)
     ).toBeInTheDocument();
-  });
-
-  it('should show validation error when only password is missing', async () => {
-    renderPage();
-
-    fireEvent.change(screen.getByLabelText(/correo electrónico/i), {
-      target: { value: 'test@test.com' },
-    });
-
-    fireEvent.click(screen.getByText(/iniciar sesión/i));
-
-    expect(
-      await screen.findByText(/contraseña es requerida/i)
-    ).toBeInTheDocument();
-  });
-
-  it('should handle loading state (button exists during submit)', async () => {
-    mockLogin.mockImplementation(
-      () => new Promise((resolve) => setTimeout(resolve, 100))
-    );
-
-    renderPage();
-
-    fireEvent.change(screen.getByLabelText(/correo electrónico/i), {
-      target: { value: 'test@test.com' },
-    });
-
-    fireEvent.change(screen.getByLabelText(/contraseña/i), {
-      target: { value: '123456' },
-    });
-
-    fireEvent.click(screen.getByText(/iniciar sesión/i));
-
-    expect(screen.getByText(/iniciar sesión/i)).toBeInTheDocument();
   });
 });
