@@ -12,6 +12,7 @@ const {
   buscarPorNicknameEnSala,
   buscarPorTokenYSala,
   listarPorSala,
+  contarPorSala,
   actualizarSocketId,
   actualizarActividad,
   actualizarActividadPorNickname,
@@ -167,6 +168,33 @@ describe('Sesiones Repository', () => {
     );
 
     expect(result).toEqual(sesionesMock);
+  });
+
+  // CONTAR POR SALA
+
+  test('debe contar sesiones por sala', async () => {
+    pool.query.mockResolvedValue({
+      rows: [{ total: 7 }],
+    });
+
+    const result = await contarPorSala('sala-uuid-1');
+
+    expect(pool.query).toHaveBeenCalledWith(
+      'SELECT COUNT(*)::int AS total FROM sesiones_activas WHERE sala_id = $1',
+      ['sala-uuid-1']
+    );
+
+    expect(result).toBe(7);
+  });
+
+  test('debe retornar 0 si no hay sesiones', async () => {
+    pool.query.mockResolvedValue({
+      rows: [{ total: 0 }],
+    });
+
+    const result = await contarPorSala('sala-vacia');
+
+    expect(result).toBe(0);
   });
 
   // ACTUALIZAR SOCKET ID

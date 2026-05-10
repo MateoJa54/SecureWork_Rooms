@@ -5,6 +5,7 @@ import {
   formatTipoSala,
   getFechaCreacion,
   getMaxArchivoMb,
+  getMaxUsuarios,
   getTimeoutMinutos,
   getTipoSala,
   isSalaMultimedia,
@@ -33,6 +34,7 @@ export default function SalaCard({ sala, onEliminar }) {
   const tipo = getTipoSala(sala);
   const multimedia = isSalaMultimedia(sala);
   const maxArchivoMb = getMaxArchivoMb(sala);
+  const maxUsuarios = getMaxUsuarios(sala);
   const usuariosConectados = sala.usuarios_conectados ?? sala.sesiones?.length ?? 0;
   const theme = multimedia
     ? {
@@ -102,7 +104,7 @@ export default function SalaCard({ sala, onEliminar }) {
               <Icon type="users" className="h-3.5 w-3.5" />
               Activos
             </p>
-            <p className="mt-1 text-sm font-bold text-slate-950">{usuariosConectados}</p>
+            <p className="mt-1 text-sm font-bold text-slate-950">{usuariosConectados} / {maxUsuarios}</p>
           </div>
           <div className="rounded-lg bg-white/75 px-3 py-2">
             <p className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-500">

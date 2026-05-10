@@ -25,6 +25,10 @@ function getJoinErrorMessage(err) {
     return 'Este dispositivo ya esta unido a otra sala activa. Sal de esa sala antes de unirte a una nueva.';
   }
 
+  if (codigo === 'SALA_LLENA' || normalized.includes('llena')) {
+    return 'La sala alcanzo el limite maximo de usuarios. Intenta mas tarde o contacta al administrador.';
+  }
+
   if (codigo === 'DATOS_INVALIDOS') {
     return 'Completa el PIN y tu nickname para unirte.';
   }
