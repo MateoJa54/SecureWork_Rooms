@@ -213,16 +213,16 @@ export default function SalaChat() {
   }
 
   return (
-    <main className="h-screen overflow-hidden bg-slate-100">
+    <main className="h-dvh overflow-hidden bg-slate-100">
       <div className="relative flex h-full">
-        <aside className="flex w-16 shrink-0 flex-col items-center bg-gradient-to-b from-primary-900 via-primary-700 to-sky-500 py-5 text-white md:w-20">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-sm font-bold text-primary-700 shadow-lg shadow-blue-950/20">
+        <aside className="flex w-14 shrink-0 flex-col items-center bg-gradient-to-b from-primary-900 via-primary-700 to-sky-500 py-4 text-white md:w-20 md:py-5">
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-sm font-bold text-primary-700 shadow-lg shadow-blue-950/20 md:h-11 md:w-11">
             SW
           </div>
           <button
             type="button"
             onClick={() => setShowUsers((prev) => !prev)}
-            className={`mt-10 flex h-11 w-11 items-center justify-center rounded-2xl transition ${showUsers ? 'bg-white text-primary-700 shadow-lg shadow-blue-950/20' : 'bg-white/15 text-white ring-1 ring-white/20 hover:bg-white/25'}`}
+            className={`mt-8 flex h-10 w-10 items-center justify-center rounded-2xl transition md:mt-10 md:h-11 md:w-11 ${showUsers ? 'bg-white text-primary-700 shadow-lg shadow-blue-950/20' : 'bg-white/15 text-white ring-1 ring-white/20 hover:bg-white/25'}`}
             title="Usuarios conectados"
           >
             <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -231,7 +231,7 @@ export default function SalaChat() {
           </button>
           <button
             onClick={handleSalir}
-            className="mt-auto flex h-11 w-11 items-center justify-center rounded-2xl text-blue-100 transition hover:bg-white/15 hover:text-white"
+            className="mt-auto flex h-10 w-10 items-center justify-center rounded-2xl text-blue-100 transition hover:bg-white/15 hover:text-white md:h-11 md:w-11"
             title="Salir"
           >
             <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -255,13 +255,13 @@ export default function SalaChat() {
         )}
 
         <section className="flex min-w-0 flex-1 flex-col bg-slate-50">
-          <header className="flex h-20 shrink-0 items-center justify-between border-b border-slate-100 bg-white px-4 sm:px-6">
+          <header className="flex min-h-16 shrink-0 items-center justify-between gap-3 border-b border-slate-100 bg-white px-3 py-3 sm:h-20 sm:px-6 sm:py-0">
             <div className="min-w-0">
               <div className="flex items-center gap-3">
                 <span className={`h-2.5 w-2.5 rounded-full ${conectado ? 'bg-emerald-400 ring-4 ring-emerald-50' : 'bg-slate-300 ring-4 ring-slate-100'}`} />
-                <h1 className="truncate text-xl font-bold text-slate-950">{sala?.nombre ?? 'Sala segura'}</h1>
+                <h1 className="truncate text-base font-bold text-slate-950 sm:text-xl">{sala?.nombre ?? 'Sala segura'}</h1>
               </div>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 truncate text-xs text-slate-500 sm:text-sm">
                 {conectado ? `Conectado como ${nickname || 'invitado'}` : 'Reconectando...'}
               </p>
             </div>
@@ -276,7 +276,7 @@ export default function SalaChat() {
           <div className="flex min-h-0 flex-1">
             <div className="flex min-w-0 flex-1 flex-col">
               {expulsionMessage && (
-                <div className="border-b border-red-100 bg-red-50 px-5 py-3 text-center text-sm font-semibold text-red-700">
+                <div className="border-b border-red-100 bg-red-50 px-3 py-3 text-center text-sm font-semibold text-red-700 sm:px-5">
                   {expulsionMessage}
                 </div>
               )}

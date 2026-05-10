@@ -34,15 +34,15 @@ export default function MessageInput({ onSend, onTyping, disabled, attachment })
   }
 
   return (
-    <div className="border-t border-slate-100 bg-white px-4 py-3">
-      <div className="flex items-end gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 shadow-sm focus-within:border-primary-300 focus-within:bg-white focus-within:ring-4 focus-within:ring-primary-50">
+    <div className="border-t border-slate-100 bg-white px-2 py-2 sm:px-4 sm:py-3">
+      <div className="flex items-end gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-2 py-2 shadow-sm focus-within:border-primary-300 focus-within:bg-white focus-within:ring-4 focus-within:ring-primary-50 sm:gap-3 sm:px-3">
         {attachment && (
           <div className="flex h-11 shrink-0 items-center">
             {attachment}
           </div>
         )}
         <textarea
-          className="min-h-[42px] max-h-32 flex-1 resize-none border-0 bg-transparent px-1 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-0"
+          className="min-h-[42px] max-h-32 min-w-0 flex-1 resize-none border-0 bg-transparent px-1 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-0"
           placeholder="Escribe un mensaje... Enter para enviar"
           value={texto}
           maxLength={MAX_CHARS}
@@ -54,7 +54,7 @@ export default function MessageInput({ onSend, onTyping, disabled, attachment })
         <button
           onClick={submit}
           disabled={!texto.trim() || disabled}
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-primary-700 to-sky-500 text-white shadow-lg shadow-primary-600/25 transition hover:from-primary-800 hover:to-sky-600 disabled:cursor-not-allowed disabled:opacity-40"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-primary-700 to-sky-500 text-white shadow-lg shadow-primary-600/25 transition hover:from-primary-800 hover:to-sky-600 disabled:cursor-not-allowed disabled:opacity-40 sm:h-11 sm:w-11"
           title="Enviar mensaje"
         >
           <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">

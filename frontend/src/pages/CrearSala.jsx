@@ -39,8 +39,8 @@ export default function CrearSala() {
 
   return (
     <AdminShell>
-      <section className="mx-auto max-w-xl overflow-hidden rounded-lg border border-primary-100 bg-white shadow-xl shadow-primary-900/10">
-        <div className="bg-gradient-to-r from-primary-900 via-primary-700 to-sky-500 px-5 py-4 text-white">
+      <section className="mx-auto w-full max-w-xl overflow-hidden rounded-lg border border-primary-100 bg-white shadow-xl shadow-primary-900/10">
+        <div className="bg-gradient-to-r from-primary-900 via-primary-700 to-sky-500 px-4 py-4 text-white sm:px-5">
           <div className="flex items-center gap-3">
             <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-primary-700 shadow-lg">
               <Icon type="shield" className="h-5 w-5" />
@@ -59,7 +59,7 @@ export default function CrearSala() {
           </div>
         </div>
 
-        <div className="bg-slate-50 px-5 py-5">
+        <div className="bg-slate-50 px-4 py-5 sm:px-5">
           <ErrorMessage message={error} />
           <SalaForm onSubmit={handleSubmit} loading={loading} />
           <div className="mt-3">

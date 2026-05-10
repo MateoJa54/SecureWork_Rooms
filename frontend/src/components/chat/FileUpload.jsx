@@ -94,7 +94,7 @@ export default function FileUpload({ salaId, sessionToken, maxMb = DEFAULT_MAX_M
         )}
       </button>
       {error && (
-        <span className="absolute right-0 top-12 z-10 w-56 rounded-xl border border-red-100 bg-red-50 px-3 py-2 text-xs font-medium text-red-600 shadow-lg">
+        <span className="absolute left-0 top-12 z-10 w-56 max-w-[70vw] rounded-xl border border-red-100 bg-red-50 px-3 py-2 text-xs font-medium text-red-600 shadow-lg sm:left-auto sm:right-0">
           {error}
         </span>
       )}

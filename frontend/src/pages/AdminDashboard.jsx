@@ -72,16 +72,16 @@ export default function AdminDashboard() {
   return (
     <AdminShell>
       <section className="mb-6 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-        <div className="flex flex-col gap-4 border-b border-slate-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
+        <div className="flex flex-col gap-4 border-b border-slate-100 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+          <div className="min-w-0">
             <h1 className="text-xl font-bold text-slate-950">Estado general</h1>
             <p className="text-sm text-slate-500">Resumen de salas activas y acceso rapido a la administracion.</p>
           </div>
-          <Link to="/admin/salas/nueva">
-            <Button className="text-sm">Nueva sala</Button>
+          <Link to="/admin/salas/nueva" className="w-full sm:w-auto">
+            <Button className="w-full text-sm sm:w-auto">Nueva sala</Button>
           </Link>
         </div>
-        <div className="grid gap-3 p-5 sm:grid-cols-3">
+        <div className="grid gap-3 p-4 sm:grid-cols-3 sm:p-5">
           <StatCard label="Salas creadas" value={salas.length} tone="total" />
           <StatCard label="Solo texto" value={texto.length} tone="text" />
           <StatCard label="Archivos" value={multimedia.length} tone="media" />
@@ -101,16 +101,16 @@ export default function AdminDashboard() {
         </div>
       ) : (
         <section>
-          <div className="mb-4 flex items-center justify-between gap-4">
-            <div>
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
               <h2 className="text-lg font-bold text-slate-950">Salas mas recientes</h2>
               <p className="text-sm text-slate-500">Ultimas dos salas creadas.</p>
             </div>
-            <div className="flex gap-2">
-              <Link to="/admin/salas/texto" className="rounded-lg bg-sky-50 px-3 py-2 text-sm font-semibold text-sky-700 transition hover:bg-sky-100">
+            <div className="grid grid-cols-2 gap-2 sm:flex">
+              <Link to="/admin/salas/texto" className="rounded-lg bg-sky-50 px-3 py-2 text-center text-sm font-semibold text-sky-700 transition hover:bg-sky-100">
                 Ver texto
               </Link>
-              <Link to="/admin/salas/archivos" className="rounded-lg bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100">
+              <Link to="/admin/salas/archivos" className="rounded-lg bg-emerald-50 px-3 py-2 text-center text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100">
                 Ver archivos
               </Link>
             </div>

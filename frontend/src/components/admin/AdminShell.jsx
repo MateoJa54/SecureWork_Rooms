@@ -44,30 +44,30 @@ export default function AdminShell({ children }) {
   }
 
   const navClass = ({ isActive }) =>
-    `px-2 py-1 text-sm font-semibold transition sm:px-3 sm:text-base ${
+    `whitespace-nowrap px-2 py-1 text-sm font-semibold transition sm:px-3 sm:text-base ${
       isActive
         ? 'text-white'
         : 'text-blue-100 hover:text-white'
     }`;
 
   return (
-    <div className="min-h-screen bg-slate-100">
+    <div className="min-h-dvh bg-slate-100">
       <header className="sticky top-0 z-40 border-b border-primary-900/20 bg-primary-700 text-white shadow-lg shadow-primary-900/20">
-        <div className="mx-auto flex h-16 max-w-6xl items-center gap-4 px-4 sm:px-6">
-          <Link to="/admin/dashboard" className="flex shrink-0 items-center gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-white text-sm font-black text-primary-700 shadow-sm">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-3 px-3 py-3 sm:px-6 lg:flex-nowrap">
+          <Link to="/admin/dashboard" className="flex min-w-0 shrink-0 items-center gap-2 sm:gap-3">
+            <span className="flex h-9 w-9 items-center justify-center rounded-full border border-white/30 bg-white text-sm font-black text-primary-700 shadow-sm sm:h-10 sm:w-10">
               SW
             </span>
             <span className="hidden text-lg font-bold sm:block">SecureWork Rooms</span>
           </Link>
 
-          <nav className="ml-auto flex items-center gap-2 sm:gap-4">
+          <nav className="order-3 flex w-full items-center gap-1 overflow-x-auto pb-0.5 sm:gap-3 lg:order-none lg:ml-auto lg:w-auto lg:overflow-visible">
             <NavLink to="/admin/dashboard" className={navClass}>General</NavLink>
             <NavLink to="/admin/salas/texto" className={navClass}>Texto</NavLink>
             <NavLink to="/admin/salas/archivos" className={navClass}>Archivos</NavLink>
           </nav>
 
-          <div className="relative shrink-0" ref={menuRef}>
+          <div className="relative ml-auto shrink-0 lg:ml-0" ref={menuRef}>
             <button
               type="button"
               onClick={() => setMenuOpen((prev) => !prev)}
@@ -75,7 +75,7 @@ export default function AdminShell({ children }) {
               aria-expanded={menuOpen}
               aria-label="Menu de administrador"
             >
-              <span className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-sm font-bold text-primary-700 shadow-sm">
+              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-sm font-bold text-primary-700 shadow-sm sm:h-11 sm:w-11">
                 <Icon type="users" className="h-5 w-5" />
               </span>
               <span className="hidden h-9 w-9 items-center justify-center rounded-full bg-white/15 text-sm font-semibold md:flex">
@@ -85,7 +85,7 @@ export default function AdminShell({ children }) {
             </button>
 
             {menuOpen && (
-              <div className="absolute right-0 top-14 w-72 rounded-lg border border-slate-200 bg-white py-2 text-slate-800 shadow-2xl">
+              <div className="absolute right-0 top-12 w-[calc(100vw-2rem)] max-w-72 rounded-lg border border-slate-200 bg-white py-2 text-slate-800 shadow-2xl sm:top-14">
                 <span className="absolute -top-2 right-8 h-4 w-4 rotate-45 border-l border-t border-slate-200 bg-white" />
                 <div className="px-4 py-3">
                   <p className="text-sm font-bold text-slate-950">{adminName}</p>
@@ -106,7 +106,7 @@ export default function AdminShell({ children }) {
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl px-6 py-8">
+      <main className="mx-auto max-w-5xl px-3 py-5 sm:px-6 sm:py-8">
         {children}
       </main>
     </div>

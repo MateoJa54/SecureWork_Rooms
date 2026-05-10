@@ -60,8 +60,8 @@ export default function SalaCard({ sala, onEliminar }) {
     <article className={`group overflow-hidden rounded-lg border bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg ${theme.shell}`}>
       <div className={`h-1 bg-gradient-to-r ${theme.accent}`} />
 
-      <div className="p-4">
-        <div className="flex items-start justify-between gap-3">
+      <div className="p-3 sm:p-4">
+        <div className="flex items-start justify-between gap-2 sm:gap-3">
           <div className="flex min-w-0 items-center gap-3">
             <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg shadow-lg ${theme.icon}`}>
               <Icon type={multimedia ? 'file' : 'text'} className="h-5 w-5" />
@@ -71,7 +71,7 @@ export default function SalaCard({ sala, onEliminar }) {
               <p className="mt-0.5 truncate text-xs text-slate-500">{formatFecha(getFechaCreacion(sala))}</p>
             </div>
           </div>
-          <span className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold ring-1 ${theme.badge}`}>
+          <span className={`shrink-0 rounded-full px-2 py-1 text-[10px] font-bold ring-1 sm:px-2.5 sm:text-[11px] ${theme.badge}`}>
             {formatTipoSala(tipo)}
           </span>
         </div>
@@ -122,8 +122,8 @@ export default function SalaCard({ sala, onEliminar }) {
           )}
         </div>
 
-        <div className="mt-4 flex items-center gap-2">
-          <Link to={`/admin/salas/${sala.id}`} className={`flex flex-1 items-center justify-center gap-2 rounded-lg border border-white/80 bg-white px-3 py-2 text-sm font-bold transition ${theme.detail}`}>
+        <div className="mt-4 grid grid-cols-[1fr_auto] items-center gap-2">
+          <Link to={`/admin/salas/${sala.id}`} className={`flex min-w-0 items-center justify-center gap-2 rounded-lg border border-white/80 bg-white px-3 py-2 text-sm font-bold transition ${theme.detail}`}>
             Detalle
             <Icon type="arrow" className="h-3.5 w-3.5" />
           </Link>
