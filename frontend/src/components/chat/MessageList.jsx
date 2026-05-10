@@ -55,7 +55,7 @@ function FileAttachment({ archivo, sessionToken, mine }) {
 
   if (loading) {
     return (
-      <div className={`mt-2 rounded-2xl px-4 py-3 text-sm ${mine ? 'bg-white/15 text-white' : 'bg-slate-50 text-slate-500'}`}>
+      <div className={`mt-2 rounded-2xl px-4 py-3 text-sm ${mine ? 'border border-primary-100 bg-primary-50 text-slate-600' : 'bg-slate-50 text-slate-500'}`}>
         Cargando archivo...
       </div>
     );
@@ -63,7 +63,7 @@ function FileAttachment({ archivo, sessionToken, mine }) {
 
   if (error || !objectUrl) {
     return (
-      <div className={`mt-2 rounded-2xl px-4 py-3 text-sm ${mine ? 'bg-white/15 text-white' : 'bg-red-50 text-red-600'}`}>
+      <div className="mt-2 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-600">
         No se pudo cargar el archivo.
       </div>
     );
@@ -83,7 +83,7 @@ function FileAttachment({ archivo, sessionToken, mine }) {
       download={name}
       target="_blank"
       rel="noreferrer"
-      className={`mt-2 flex items-center gap-3 rounded-2xl px-4 py-3 text-sm transition ${mine ? 'bg-white/15 text-white hover:bg-white/20' : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50'}`}
+      className={`mt-2 flex items-center gap-3 rounded-2xl px-4 py-3 text-sm transition ${mine ? 'border border-primary-100 bg-primary-50 text-slate-800 hover:bg-primary-100' : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50'}`}
     >
       <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${mine ? 'bg-white text-primary-700' : 'bg-primary-50 text-primary-700'}`}>
         <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -93,7 +93,7 @@ function FileAttachment({ archivo, sessionToken, mine }) {
       </span>
       <span className="min-w-0">
         <span className="block truncate font-semibold">{name}</span>
-        <span className={`block text-xs ${mine ? 'text-blue-100' : 'text-slate-400'}`}>{formatBytes(Number(size))}</span>
+        <span className={`block text-xs ${mine ? 'text-slate-500' : 'text-slate-400'}`}>{formatBytes(Number(size))}</span>
       </span>
     </a>
   );

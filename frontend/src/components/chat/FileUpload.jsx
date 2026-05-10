@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { subirArchivo } from '../../services/salas.service.js';
 import { formatBytes } from '../../utils/formatters.js';
 
@@ -27,6 +27,16 @@ export default function FileUpload({ salaId, sessionToken, maxMb = DEFAULT_MAX_M
   function clearInput() {
     if (inputRef.current) inputRef.current.value = '';
   }
+
+  useEffect(() => {
+    if (!error) return undefined;
+
+    const timer = window.setTimeout(() => {
+      setError('');
+    }, 5000);
+
+    return () => window.clearTimeout(timer);
+  }, [error]);
 
   async function handleFile(e) {
     const file = e.target.files?.[0];
@@ -94,7 +104,10 @@ export default function FileUpload({ salaId, sessionToken, maxMb = DEFAULT_MAX_M
         )}
       </button>
       {error && (
-        <span className="absolute left-0 top-12 z-10 w-56 max-w-[70vw] rounded-xl border border-red-100 bg-red-50 px-3 py-2 text-xs font-medium text-red-600 shadow-lg sm:left-auto sm:right-0">
+        <span
+          role="alert"
+          className="fixed left-1/2 top-4 z-50 w-[calc(100vw-2rem)] max-w-sm -translate-x-1/2 rounded-lg border border-red-200 bg-red-600 px-4 py-3 text-center text-sm font-semibold text-white shadow-xl"
+        >
           {error}
         </span>
       )}

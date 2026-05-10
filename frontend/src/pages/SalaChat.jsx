@@ -242,14 +242,14 @@ export default function SalaChat() {
 
         {showUsers && (
           <>
-            <button
-              type="button"
-              className="absolute inset-0 z-20 bg-slate-950/20 md:hidden"
-              onClick={() => setShowUsers(false)}
-              aria-label="Cerrar usuarios"
-            />
-            <div className="absolute left-0 top-0 z-30 h-full w-80 max-w-[86vw] md:left-20">
-              <UserSidebar usuarios={usuarios} nicknameSelf={nickname} className="h-full w-full border-r border-slate-100 shadow-2xl" />
+            <div className="absolute inset-y-0 left-14 right-0 z-20 bg-slate-950/25 md:left-20" aria-hidden="true" />
+            <div className="absolute left-14 top-0 z-30 h-full w-80 max-w-[calc(100vw-3.5rem)] md:left-20 md:max-w-[calc(100vw-5rem)]">
+              <UserSidebar
+                usuarios={usuarios}
+                nicknameSelf={nickname}
+                onClose={() => setShowUsers(false)}
+                className="h-full w-full border-r border-slate-100 shadow-2xl"
+              />
             </div>
           </>
         )}
@@ -313,16 +313,6 @@ export default function SalaChat() {
                 <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-semibold ring-1 ring-white/20">
                   Secure Room
                 </span>
-              </div>
-
-              <div className="mt-8 aspect-video rounded-2xl bg-white/12 p-4 ring-1 ring-white/20">
-                <div className="flex h-full items-center justify-center rounded-xl bg-slate-950/20">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white text-primary-700 shadow-lg">
-                    <svg className="h-7 w-7 translate-x-0.5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                      <path d="M8 5v14l11-7-11-7Z" />
-                    </svg>
-                  </div>
-                </div>
               </div>
 
               <h2 className="mt-6 text-2xl font-bold leading-tight">Conversaciones privadas para equipos rapidos.</h2>
