@@ -114,7 +114,7 @@ export default function DetalleSala() {
       {error && <ErrorMessage message={error} />}
 
       {sala && (
-        <div className="mx-auto max-w-3xl space-y-4">
+        <div className="mx-auto w-full max-w-3xl space-y-4">
           <Link to={backPath} className="inline-flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-sm font-bold text-slate-600 shadow-sm ring-1 ring-slate-200 transition hover:text-primary-700 hover:ring-primary-200">
             <Icon type="arrow" className="h-4 w-4" />
             {backLabel}
@@ -122,15 +122,15 @@ export default function DetalleSala() {
 
           <section className={`overflow-hidden rounded-lg border bg-white shadow-xl shadow-primary-900/10 ${theme.shell}`}>
             <div className={`h-1 bg-gradient-to-r ${theme.accent}`} />
-            <div className="p-5">
+            <div className="p-4 sm:p-5">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                <div className="flex min-w-0 items-center gap-3">
+                <div className="flex min-w-0 items-start gap-3 sm:items-center">
                   <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg shadow-lg ${theme.icon}`}>
                     <Icon type={multimedia ? 'file' : 'text'} className="h-5 w-5" />
                   </span>
                   <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <h1 className="truncate text-xl font-black text-slate-950">{sala.nombre}</h1>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h1 className="min-w-0 break-words text-xl font-black text-slate-950">{sala.nombre}</h1>
                       <span className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold ring-1 ${theme.badge}`}>
                         {formatTipoSala(tipo)}
                       </span>
@@ -140,7 +140,7 @@ export default function DetalleSala() {
                     </p>
                   </div>
                 </div>
-                <div className="rounded-lg bg-white/80 px-4 py-3 text-right shadow-sm">
+                <div className="rounded-lg bg-white/80 px-4 py-3 text-left shadow-sm sm:text-right">
                   <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Usuarios activos</p>
                   <p className="mt-1 text-2xl font-black text-slate-950">{usuarios.length}</p>
                 </div>
@@ -151,7 +151,7 @@ export default function DetalleSala() {
                   <div className="flex items-center justify-between gap-3">
                     <div className="min-w-0">
                       <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Codigo de acceso</p>
-                      <code className="mt-1 block font-mono text-xl font-black tracking-wide text-slate-950">{sala.pin_plano}</code>
+                      <code className="mt-1 block break-all font-mono text-xl font-black tracking-wide text-slate-950">{sala.pin_plano}</code>
                     </div>
                     <button
                       type="button"
@@ -168,7 +168,7 @@ export default function DetalleSala() {
                 </div>
               )}
 
-              <div className={`mt-4 grid gap-2 ${multimedia && maxArchivoMb ? 'sm:grid-cols-5' : 'sm:grid-cols-4'}`}>
+              <div className={`mt-4 grid gap-2 ${multimedia && maxArchivoMb ? 'sm:grid-cols-2 lg:grid-cols-5' : 'sm:grid-cols-2 lg:grid-cols-4'}`}>
                 <MetricItem icon="shield" label="Tipo" value={formatTipoSala(tipo)} />
                 <MetricItem icon="users" label="Conectados" value={`${usuarios.length}`} />
                 <MetricItem icon="clock" label="Timeout" value={`${getTimeoutMinutos(sala)} min`} />
@@ -181,7 +181,7 @@ export default function DetalleSala() {
           </section>
 
           <section className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-            <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-4">
+            <div className="flex items-start justify-between gap-3 border-b border-slate-100 px-4 py-4 sm:items-center sm:px-5">
               <div>
                 <h2 className="text-base font-bold text-slate-950">Usuarios conectados</h2>
                 <p className="mt-0.5 text-sm text-slate-500">Sesiones activas y expulsion de usuarios.</p>
@@ -190,7 +190,7 @@ export default function DetalleSala() {
                 {usuarios.length}
               </span>
             </div>
-            <div className="p-4">
+            <div className="p-3 sm:p-4">
               <ErrorMessage message={expError} />
               <UsuariosConectados
                 usuarios={usuarios}

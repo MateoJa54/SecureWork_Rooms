@@ -72,8 +72,8 @@ export default function AdminSalasPorTipo({ tipo }) {
     <AdminShell>
       <section className={`mb-6 overflow-hidden rounded-lg border bg-white shadow-sm ${isArchivos ? 'border-emerald-100' : 'border-sky-100'}`}>
         <div className={`h-1 bg-gradient-to-r ${isArchivos ? 'from-emerald-500 to-teal-500' : 'from-primary-600 to-sky-500'}`} />
-        <div className="flex flex-col gap-4 px-5 py-5 lg:flex-row lg:items-center lg:justify-between">
-          <div>
+        <div className="flex flex-col gap-4 px-4 py-5 sm:px-5 lg:flex-row lg:items-center lg:justify-between">
+          <div className="min-w-0">
             <p className={`text-xs font-bold uppercase tracking-wide ${isArchivos ? 'text-emerald-700' : 'text-sky-700'}`}>
               {isArchivos ? 'Salas multimedia' : 'Salas de texto'}
             </p>
@@ -85,7 +85,7 @@ export default function AdminSalasPorTipo({ tipo }) {
             </p>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-            <div className="relative">
+            <div className="relative w-full sm:w-auto">
               <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
                 <SearchIcon />
               </span>
@@ -96,8 +96,8 @@ export default function AdminSalasPorTipo({ tipo }) {
                 className="h-10 w-full rounded-lg border border-slate-200 bg-slate-50 pl-9 pr-3 text-sm text-slate-800 outline-none transition focus:border-primary-300 focus:bg-white focus:ring-4 focus:ring-primary-50 sm:w-72"
               />
             </div>
-            <Link to="/admin/salas/nueva">
-              <Button className="h-10 text-sm">Nueva sala</Button>
+            <Link to="/admin/salas/nueva" className="w-full sm:w-auto">
+              <Button className="h-10 w-full text-sm sm:w-auto">Nueva sala</Button>
             </Link>
           </div>
         </div>

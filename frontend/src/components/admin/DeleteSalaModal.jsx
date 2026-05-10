@@ -4,7 +4,7 @@ export default function DeleteSalaModal({ sala, loading, onCancel, onConfirm }) 
   if (!sala) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 px-4">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/40 px-3 py-3 sm:items-center sm:px-4">
       <div className="w-full max-w-md overflow-hidden rounded-lg bg-white shadow-2xl">
         <div className="bg-gradient-to-r from-red-700 to-red-500 px-5 py-4 text-white">
           <p className="text-xs font-bold uppercase tracking-wide text-red-100">Confirmar eliminacion</p>
@@ -19,7 +19,7 @@ export default function DeleteSalaModal({ sala, loading, onCancel, onConfirm }) 
             Los usuarios conectados seran notificados y saldran de la sala.
           </div>
 
-          <div className="flex gap-2">
+          <div className="grid gap-2 sm:grid-cols-2">
             <Button variant="secondary" className="flex-1" onClick={onCancel} disabled={loading}>
               Cancelar
             </Button>

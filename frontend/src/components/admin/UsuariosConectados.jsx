@@ -24,7 +24,7 @@ export default function UsuariosConectados({ usuarios, onExpulsar, loadingNick }
   return (
     <ul className="space-y-2">
       {usuarios.map((u) => (
-        <li key={u.nickname} className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white px-3 py-3">
+        <li key={u.nickname} className="flex flex-col gap-3 rounded-lg border border-slate-200 bg-white px-3 py-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex min-w-0 items-center gap-3">
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-50 text-sm font-bold text-primary-700">
               {(u.nickname || '?').slice(0, 1).toUpperCase()}
@@ -36,7 +36,7 @@ export default function UsuariosConectados({ usuarios, onExpulsar, loadingNick }
           </div>
           <Button
             variant="danger"
-            className="shrink-0 text-xs py-1.5 px-3"
+            className="w-full shrink-0 text-xs py-1.5 px-3 sm:w-auto"
             loading={loadingNick === u.nickname}
             onClick={() => onExpulsar(u.nickname)}
           >

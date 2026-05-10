@@ -72,7 +72,7 @@ function FileAttachment({ archivo, sessionToken, mine }) {
   if (isImage(mime)) {
     return (
       <a href={objectUrl} target="_blank" rel="noreferrer" className="mt-2 block overflow-hidden rounded-2xl">
-        <img src={objectUrl} alt={name} className="max-h-72 w-full max-w-sm object-cover" />
+        <img src={objectUrl} alt={name} className="max-h-72 w-full max-w-[min(22rem,72vw)] object-cover" />
       </a>
     );
   }
@@ -126,8 +126,8 @@ export default function MessageList({ mensajes, nicknameSelf, typingUsers = [], 
   }
 
   return (
-    <div className="flex-1 overflow-y-auto px-5 py-6">
-      <div className="mx-auto flex max-w-4xl flex-col gap-4">
+    <div className="flex-1 overflow-y-auto px-3 py-4 sm:px-5 sm:py-6">
+      <div className="mx-auto flex max-w-4xl flex-col gap-3 sm:gap-4">
         {mensajes.map((msg, i) => {
           if (msg.tipo === 'sistema') {
             return (
@@ -145,8 +145,8 @@ export default function MessageList({ mensajes, nicknameSelf, typingUsers = [], 
 
           return (
             <div key={msg.id ?? msg.archivo?.id ?? i} className={`flex ${esMio ? 'justify-end' : 'justify-start'}`}>
-              <div className={`flex max-w-[78%] gap-3 ${esMio ? 'flex-row-reverse' : 'flex-row'}`}>
-                <div className={`mt-6 flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold ${esMio ? 'bg-primary-100 text-primary-700' : 'bg-sky-100 text-sky-700'}`}>
+              <div className={`flex max-w-[88%] gap-2 sm:max-w-[78%] sm:gap-3 ${esMio ? 'flex-row-reverse' : 'flex-row'}`}>
+                <div className={`mt-6 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold sm:h-9 sm:w-9 sm:text-sm ${esMio ? 'bg-primary-100 text-primary-700' : 'bg-sky-100 text-sky-700'}`}>
                   {(msg.nickname || '?').slice(0, 1).toUpperCase()}
                 </div>
                 <div className={`flex flex-col ${esMio ? 'items-end' : 'items-start'}`}>
@@ -154,7 +154,7 @@ export default function MessageList({ mensajes, nicknameSelf, typingUsers = [], 
                     <span className="mb-1 text-xs font-semibold text-slate-500">{msg.nickname}</span>
                   )}
                   {hasText && (
-                    <div className={`rounded-2xl px-4 py-3 text-sm leading-6 shadow-sm ${esMio ? 'rounded-br-md bg-gradient-to-r from-primary-700 to-sky-500 text-white shadow-primary-600/20' : 'rounded-bl-md border border-slate-200 bg-white text-slate-800'}`}>
+                    <div className={`break-words rounded-2xl px-3 py-2.5 text-sm leading-6 shadow-sm sm:px-4 sm:py-3 ${esMio ? 'rounded-br-md bg-gradient-to-r from-primary-700 to-sky-500 text-white shadow-primary-600/20' : 'rounded-bl-md border border-slate-200 bg-white text-slate-800'}`}>
                       {msg.contenido}
                     </div>
                   )}
