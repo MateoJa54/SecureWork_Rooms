@@ -1,5 +1,5 @@
 const { parentPort } = require('worker_threads');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 if (parentPort) {
   parentPort.on('message', async (task) => {
