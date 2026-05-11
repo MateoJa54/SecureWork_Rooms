@@ -5,6 +5,7 @@ const http = require('http');
 const { Server } = require('socket.io');
 const app = require('./app');
 const { initSocket } = require('./src/controllers/socket.controller');
+const { iniciarJobInactividad } = require('./src/jobs/inactividad.job');
 
 process.on('uncaughtException', (err) => {
   console.error('[FATAL] Uncaught Exception:', err.message);
@@ -28,6 +29,7 @@ const io = new Server(httpServer, {
 });
 
 initSocket(io);
+iniciarJobInactividad(io);
 
 httpServer.listen(PORT, HOST, () => {
   console.log(`Backend corriendo en http://${HOST}:${PORT}`);

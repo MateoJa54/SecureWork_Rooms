@@ -36,7 +36,7 @@ describe('broadcast.worker', () => {
 
     await handler({
       id: 1,
-      operation: 'broadcast',
+      type: 'broadcast',
       payload,
     });
 
@@ -49,7 +49,7 @@ describe('broadcast.worker', () => {
   test('debe manejar operacion desconocida', async () => {
     await handler({
       id: 2,
-      operation: 'invalid',
+      type: 'invalid',
       payload: {},
     });
 
@@ -66,7 +66,7 @@ describe('broadcast.worker', () => {
 
     await handler({
       id: 3,
-      operation: 'broadcast',
+      type: 'broadcast',
       payload: circular,
     });
 

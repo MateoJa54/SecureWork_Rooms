@@ -4,20 +4,23 @@ const { fileTypeFromBuffer } = require('file-type');
 const MIME_TYPES_PERMITIDOS = [
   'image/png',
   'image/jpeg',
+  'image/gif',
+  'image/webp',
   'application/pdf',
   'text/plain',
+  'text/markdown',
 ];
 
 if (parentPort) {
   parentPort.on('message', async (task) => {
-    const { id, operation, data } = task;
+    const { id, type, payload } = task;
 
     try {
-      switch (operation) {
+      switch (type) {
 
         case 'validate': {
-          const tipoDetectado =
-            await fileTypeFromBuffer(data.buffer);
+          const buffer = Buffer.from(payload.buffer);
+          const tipoDetectado = await fileTypeFromBuffer(buffer);
 
           const mimeReal = tipoDetectado
             ? tipoDetectado.mime
@@ -30,7 +33,7 @@ if (parentPort) {
             id,
             result: {
               esValido,
-              mimeDeclared: data.mimeType,
+              mimeDeclared: payload.mimeType,
               mimeReal,
             },
           });

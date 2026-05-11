@@ -216,9 +216,6 @@ describe('Socket Controller', () => {
 
     expect(MensajesService.procesarMensaje)
       .toHaveBeenCalled();
-
-    expect(io.to)
-      .toHaveBeenCalledWith('sala_1');
   });
 
   // prueba: debe manejar error al enviar mensaje
@@ -362,7 +359,7 @@ describe('Socket Controller', () => {
     expect(SesionesService.eliminarSesion)
       .toHaveBeenCalledWith('token123');
 
-    expect(io.to)
+    expect(socket.to)
       .toHaveBeenCalledWith('sala_1');
   });
 

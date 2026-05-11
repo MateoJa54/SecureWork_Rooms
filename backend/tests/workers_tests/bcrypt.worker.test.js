@@ -34,10 +34,9 @@ describe('bcrypt.worker', () => {
 
     await handler({
       id: 1,
-      operation: 'hash',
-      data: {
-        textoPlano: '1234',
-        saltRounds: 10,
+      type: 'hash',
+      payload: {
+        plaintext: '1234',
       },
     });
 
@@ -59,9 +58,9 @@ describe('bcrypt.worker', () => {
 
     await handler({
       id: 2,
-      operation: 'compare',
-      data: {
-        textoPlano: '1234',
+      type: 'compare',
+      payload: {
+        plaintext: '1234',
         hash: 'hash',
       },
     });
@@ -82,8 +81,8 @@ describe('bcrypt.worker', () => {
 
     await handler({
       id: 3,
-      operation: 'otro',
-      data: {},
+      type: 'otro',
+      payload: {},
     });
 
     expect(mockPostMessage).toHaveBeenCalledWith({
@@ -101,9 +100,9 @@ describe('bcrypt.worker', () => {
 
     await handler({
       id: 4,
-      operation: 'hash',
-      data: {
-        textoPlano: '1234',
+      type: 'hash',
+      payload: {
+        plaintext: '1234',
       },
     });
 

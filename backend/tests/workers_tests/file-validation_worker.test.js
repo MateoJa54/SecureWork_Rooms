@@ -31,9 +31,9 @@ describe('file-validation.worker', () => {
 
     await handler({
       id: 1,
-      operation: 'validate',
-      data: {
-        buffer: Buffer.from('fake'),
+      type: 'validate',
+      payload: {
+        buffer: Array.from(Buffer.from('fake')),
         mimeType: 'image/png',
       },
     });
@@ -55,9 +55,9 @@ describe('file-validation.worker', () => {
 
     await handler({
       id: 2,
-      operation: 'validate',
-      data: {
-        buffer: Buffer.from('fake'),
+      type: 'validate',
+      payload: {
+        buffer: Array.from(Buffer.from('fake')),
         mimeType: 'application/exe',
       },
     });
@@ -77,9 +77,9 @@ describe('file-validation.worker', () => {
 
     await handler({
       id: 3,
-      operation: 'validate',
-      data: {
-        buffer: Buffer.from('fake'),
+      type: 'validate',
+      payload: {
+        buffer: Array.from(Buffer.from('fake')),
         mimeType: null,
       },
     });
@@ -98,8 +98,8 @@ describe('file-validation.worker', () => {
   test('debe manejar operacion desconocida', async () => {
     await handler({
       id: 4,
-      operation: 'otro',
-      data: {},
+      type: 'otro',
+      payload: {},
     });
 
     expect(mockPostMessage).toHaveBeenCalledWith({
@@ -115,9 +115,9 @@ describe('file-validation.worker', () => {
 
     await handler({
       id: 5,
-      operation: 'validate',
-      data: {
-        buffer: Buffer.from('fake'),
+      type: 'validate',
+      payload: {
+        buffer: Array.from(Buffer.from('fake')),
         mimeType: 'image/png',
       },
     });

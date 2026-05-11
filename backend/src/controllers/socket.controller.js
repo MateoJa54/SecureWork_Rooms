@@ -62,7 +62,11 @@ function initSocket(io) {
           contenido,
           io,
         });
-        io.to(`sala_${sesion.sala_id}`).emit('mensaje:nuevo', mensaje);
+        // El broadcast se hace dentro de procesarMensaje vía Worker Thread.
+        // Solo si no hay io (tests), emitimos aquí como fallback.
+        if (!io) {
+          socket.emit('mensaje:nuevo', mensaje);
+        }
       } catch (err) {
         socket.emit('error', { codigo: 'MENSAJE_FALLIDO', mensaje: err.message });
       }

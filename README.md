@@ -2,7 +2,7 @@
 
 Sistema de chat en tiempo real con salas seguras.  
 **Stack:** Node.js + Express + Socket.io | React + Vite + TailwindCSS | PostgreSQL | Supabase Auth  
-**Materia:** Aplicaciones Distribuidas — ESPE | **Equipo:** 3 personas | **Plazo:** 15 días
+**Materia:** Aplicaciones Distribuidas — ESPE | **Equipo:** 3 personas 
 
 ---
 
@@ -130,6 +130,12 @@ docker compose exec postgres psql -U securework_user -d securework -c "\dt"
 ---
 
 ## Estructura del proyecto
+
+### Diagrama de arquitectura
+
+![alt text](Diagramas/Diagrama_Arquitectura.png)
+
+*Figura 1. Arquitectura general: Cliente → Backend (3 capas + Worker Threads) → Persistencia.*
 
 ```
 securework-rooms/

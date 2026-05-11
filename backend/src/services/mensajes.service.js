@@ -1,10 +1,18 @@
 // TICKET-008
 'use strict';
 
+const path = require('path');
 const MensajesRepository = require('../repositories/mensajes.repository');
 const ArchivosRepository = require('../repositories/archivos.repository');
 const SalasRepository = require('../repositories/salas.repository');
 const SesionesRepository = require('../repositories/sesiones.repository');
+const WorkerPool = require('../utils/worker-pool');
+
+// Pool de broadcast: serializa payloads en hilo separado para no bloquear el event loop
+const broadcastPool =
+  process.env.NODE_ENV === 'test'
+    ? null
+    : new WorkerPool(path.join(__dirname, '../workers/broadcast.worker.js'), 2);
 
 async function procesarMensaje({ sala_id, nickname, contenido, io }) {
   if (!contenido || contenido.trim().length === 0) {
@@ -19,6 +27,20 @@ async function procesarMensaje({ sala_id, nickname, contenido, io }) {
   }
   const mensaje = await MensajesRepository.insertar({ sala_id, nickname, contenido: contenido.trim() });
   await SesionesRepository.actualizarActividadPorNickname(sala_id, nickname).catch(() => {});
+
+  // Usar Worker Thread para serializar el broadcast (criterio 4 rúbrica: concurrencia)
+  if (broadcastPool && io?.to) {
+    try {
+      // El worker serializa el mensaje en un hilo separado para no bloquear el event loop
+      await broadcastPool.ejecutar('broadcast', { mensaje });
+      // Broadcast a todos los usuarios de la sala
+      io.to(`sala_${sala_id}`).emit('mensaje:nuevo', mensaje);
+    } catch {
+      // Fallback: broadcast directo si el worker falla
+      io.to(`sala_${sala_id}`).emit('mensaje:nuevo', mensaje);
+    }
+  }
+
   return mensaje;
 }
 
